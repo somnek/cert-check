@@ -1,56 +1,85 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"log"
-	"os"
 
-	"gopkg.in/yaml.v3"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
-type Config struct {
-	Domains []string `yaml:"domains"`
+type model struct {
+	choices  []string
+	cursor   int
+	selected map[int]struct{}
 }
 
-func check(domain string) error {
-	conn, err := tls.Dial("tcp", domain+":443", nil)
-	if err != nil {
-		return err
+func initialMode() model {
+	return model{
+		choices:  []string{"🥕", "🍆", "🍄"},
+		cursor:   0,
+		selected: make(map[int]struct{}),
 	}
-	defer conn.Close()
+}
 
-	state := conn.ConnectionState()
-	leafCert := state.PeerCertificates[0]
-	issuedOn := leafCert.NotBefore
-	expiresOn := leafCert.NotAfter
-	org := leafCert.Issuer.Organization[0]
-	commonName := leafCert.Subject.CommonName
-
-	fmt.Println("---")
-	fmt.Println("Domain:", domain)
-	fmt.Println("Common Name:", commonName)
-	fmt.Println("Organization:", org)
-	fmt.Println("Issued On:", issuedOn)
-	fmt.Println("Expires On:", expiresOn)
-
+func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func main() {
-	file, err := os.ReadFile("config.yml")
-	if err != nil {
-		log.Fatal("Failed to read config file", err)
-	}
-
-	var config Config
-	if err := yaml.Unmarshal(file, &config); err != nil {
-		log.Fatal("Failed to parse config file", err)
-	}
-
-	for _, domain := range config.Domains {
-		if err := check(domain); err != nil {
-			fmt.Println(err)
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		case "j":
+			if m.cursor == len(m.choices)-1 {
+				m.cursor = 0
+			} else {
+				m.cursor++
+			}
+			return m, nil
+		case "k":
+			if m.cursor == 0 {
+				m.cursor = len(m.choices) - 1
+			} else {
+				m.cursor--
+			}
+			return m, nil
+		case " ":
+			_, ok := m.selected[m.cursor]
+			if ok {
+				delete(m.selected, m.cursor)
+			} else {
+				m.selected[m.cursor] = struct{}{}
+			}
 		}
+
+	}
+	return m, nil
+}
+
+func (m model) View() string {
+	s := "What do we eat today??\n\n"
+	for i, choice := range m.choices {
+		cursor := " "
+		if m.cursor == i {
+			cursor = ">"
+		}
+
+		checked := " "
+		if _, ok := m.selected[i]; ok {
+			checked = "x"
+		}
+
+		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+
+	}
+	return s
+}
+
+func main() {
+	p := tea.NewProgram(initialMode())
+	if _, err := p.Run(); err != nil {
+		log.Fatal(err)
 	}
 }
