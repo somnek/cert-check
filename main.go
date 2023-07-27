@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -11,13 +12,16 @@ type model struct {
 	choices  []string
 	cursor   int
 	selected map[int]struct{}
+	inputs   []textinput.Model
 }
 
 func initialMode() model {
+	var inputs []textinput.Model = make([]textinput.Model, 3)
 	return model{
 		choices:  []string{"🥕", "🍆", "🍄"},
 		cursor:   0,
 		selected: make(map[int]struct{}),
+		inputs:   inputs,
 	}
 }
 
