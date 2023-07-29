@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -9,19 +8,33 @@ import (
 )
 
 type model struct {
-	choices  []string
-	cursor   int
-	selected map[int]struct{}
-	inputs   []textinput.Model
+	input textinput.Model
+	ssls  []ssl
+	err   error
+	page  int
+	logs  string
+}
+
+type errMsg error
+
+type ssl struct {
+	domain     string
+	issuedOn   string
+	expiresOn  string
+	org        string
+	issuer     string
+	commonName string
 }
 
 func initialMode() model {
-	var inputs []textinput.Model = make([]textinput.Model, 3)
+	t := textinput.New()
+	t.Placeholder = "Type here"
+	t.Focus()
+	t.CharLimit = 200
+	t.Width = 200
+
 	return model{
-		choices:  []string{"🥕", "🍆", "🍄"},
-		cursor:   0,
-		selected: make(map[int]struct{}),
-		inputs:   inputs,
+		input: t,
 	}
 }
 
@@ -30,59 +43,56 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
-		case "j":
-			if m.cursor == len(m.choices)-1 {
-				m.cursor = 0
-			} else {
-				m.cursor++
+		case "enter":
+			ssl, err := getInfo(m.input.Value())
+			if err != nil {
+				log.Print("<--\n")
+				log.Fatal(err)
+				log.Print("-->\n")
+				return m, tea.Quit
 			}
-			return m, nil
-		case "k":
-			if m.cursor == 0 {
-				m.cursor = len(m.choices) - 1
-			} else {
-				m.cursor--
-			}
-			return m, nil
-		case " ":
-			_, ok := m.selected[m.cursor]
-			if ok {
-				delete(m.selected, m.cursor)
-			} else {
-				m.selected[m.cursor] = struct{}{}
-			}
-		}
 
+			m.ssls = append(m.ssls, ssl)
+			m.input.SetValue("")
+			m.input.Blur()
+			m.page = 1
+			return m, nil
+		}
+	case errMsg:
+		m.err = msg
+		return m, nil
 	}
-	return m, nil
+
+	m.input, cmd = m.input.Update(msg)
+	return m, cmd
 }
 
 func (m model) View() string {
-	s := "What do we eat today??\n\n"
-	for i, choice := range m.choices {
-		cursor := " "
-		if m.cursor == i {
-			cursor = ">"
+	var s string
+	if m.page == 0 {
+		s += "Enter a domain name: \n\n"
+		s += m.input.View() + "\n\n"
+	} else {
+		for _, ssl := range m.ssls {
+			s += "bread 🥖"
+			s += ssl.issuedOn + "\n"
+			s += ssl.expiresOn + "\n"
+			s += ssl.issuer + "\n"
+			s += ssl.commonName
 		}
-
-		checked := " "
-		if _, ok := m.selected[i]; ok {
-			checked = "x"
-		}
-
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
-
 	}
 	return s
 }
 
 func main() {
-	p := tea.NewProgram(initialMode())
+	p := tea.NewProgram(initialMode(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
