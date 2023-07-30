@@ -11,7 +11,6 @@ type model struct {
 	input textinput.Model
 	ssls  []ssl
 	err   error
-	page  int
 	logs  string
 }
 
@@ -21,7 +20,6 @@ type ssl struct {
 	domain     string
 	issuedOn   string
 	expiresOn  string
-	org        string
 	issuer     string
 	commonName string
 }
@@ -53,16 +51,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			ssl, err := getInfo(m.input.Value())
 			if err != nil {
-				log.Print("<--\n")
-				log.Fatal(err)
-				log.Print("-->\n")
-				return m, tea.Quit
+				m.err = err
+				return m, nil
 			}
 
 			m.ssls = append(m.ssls, ssl)
-			m.input.SetValue("")
-			m.input.Blur()
-			m.page = 1
 			return m, nil
 		}
 	case errMsg:
@@ -76,18 +69,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	var s string
-	if m.page == 0 {
-		s += "Enter a domain name: \n\n"
-		s += m.input.View() + "\n\n"
-	} else {
-		for _, ssl := range m.ssls {
-			s += "bread 🥖"
-			s += ssl.issuedOn + "\n"
-			s += ssl.expiresOn + "\n"
-			s += ssl.issuer + "\n"
-			s += ssl.commonName
-		}
+	s += "Enter a domain name: \n\n"
+	s += m.input.View() + "\n\n"
+	for _, ssl := range m.ssls {
+		s += ssl.domain + "🥖\n"
+		s += ssl.issuedOn + "\n"
+		s += ssl.expiresOn + "\n"
+		s += ssl.issuer + "\n"
+		s += ssl.commonName + "\n\n"
 	}
+
+	// print errors
+	if m.err != nil {
+		s += m.err.Error()
+	}
+
 	return s
 }
 
