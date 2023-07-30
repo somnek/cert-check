@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -72,11 +73,11 @@ func (m model) View() string {
 	s += "Enter a domain name: \n\n"
 	s += m.input.View() + "\n\n"
 	for _, ssl := range m.ssls {
-		s += ssl.domain + "🥖\n"
-		s += ssl.issuedOn + "\n"
-		s += ssl.expiresOn + "\n"
-		s += ssl.issuer + "\n"
-		s += ssl.commonName + "\n\n"
+		s += fmt.Sprintf("Domain      : %s\n", ssl.domain)
+		s += fmt.Sprintf("Issued On   : %s\n", ssl.issuedOn)
+		s += fmt.Sprintf("Expires On  : %s\n", ssl.expiresOn)
+		s += fmt.Sprintf("Issuer      : %s\n", ssl.issuer)
+		s += fmt.Sprintf("Common Name : %s\n\n", ssl.commonName)
 	}
 
 	// print errors
