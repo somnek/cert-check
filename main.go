@@ -8,11 +8,20 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+const (
+	configFolder = ".cert-check"
+	configFile   = "config.yaml"
+)
+
 type model struct {
 	input textinput.Model
 	ssls  []ssl
 	err   error
 	logs  string
+}
+
+type config struct {
+	Domains []string `yaml:"domains"`
 }
 
 type errMsg error
@@ -26,19 +35,31 @@ type ssl struct {
 }
 
 func initialMode() model {
+	configPath := getConfigPath(configFolder, configFile)
+	if !fileExists(configPath) {
+		createConfig(configFolder, configFile)
+	}
+
+	var initSsls []ssl
+	err := getSavedDomains(&initSsls, configPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	t := textinput.New()
-	t.Placeholder = "Type here"
+	t.Placeholder = "Type here..."
 	t.Focus()
 	t.CharLimit = 200
 	t.Width = 200
 
 	return model{
 		input: t,
+		ssls:  initSsls,
 	}
 }
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return textinput.Blink
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -50,13 +71,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "enter":
-			ssl, err := getInfo(m.input.Value())
+			info, err := getInfo(m.input.Value())
 			if err != nil {
 				m.err = err
 				return m, nil
 			}
 
-			m.ssls = append(m.ssls, ssl)
+			// insert at the beginning of the slice
+			m.ssls = append([]ssl{info}, m.ssls...)
+			m.input.SetValue("")
 			return m, nil
 		}
 	case errMsg:
