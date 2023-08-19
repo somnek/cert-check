@@ -21,6 +21,8 @@ func fileExists(path string) bool {
 	return !info.IsDir()
 }
 
+// getSavedDomains reads a YAML file at the given path and unmarshals it into a config struct.
+// It then appends each domain in the config to the slice of ssl structs.
 func getSavedDomains(ssls *[]ssl, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
@@ -33,9 +35,14 @@ func getSavedDomains(ssls *[]ssl, path string) error {
 	}
 
 	for _, domain := range c.Domains {
-		*ssls = append(*ssls, ssl{
-			domain: domain,
-		})
+		var newSsl ssl
+
+		newSsl, err = getInfo(domain)
+		if err != nil {
+			return err
+		}
+
+		*ssls = append(*ssls, newSsl)
 	}
 	return nil
 }
