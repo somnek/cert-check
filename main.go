@@ -18,6 +18,7 @@ type model struct {
 	ssls  []ssl
 	err   error
 	logs  string
+	page  int
 }
 
 type config struct {
@@ -68,6 +69,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "tab":
+			// if page is 0, switch to 1, else 0
+			m.page = (m.page + 1) % 2
+			return m, nil
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "enter":
@@ -77,9 +82,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			// insert at the beginning of the slice
+			// prepend to slice
 			m.ssls = append([]ssl{info}, m.ssls...)
 			m.input.SetValue("")
+			m.input.Blur()
+			m.page = 0
 			return m, nil
 		}
 	case errMsg:
@@ -93,14 +100,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	var s string
-	s += "Enter a domain name: \n\n"
-	s += m.input.View() + "\n\n"
-	for _, ssl := range m.ssls {
-		s += fmt.Sprintf("Domain      : %s\n", ssl.domain)
-		s += fmt.Sprintf("Issued On   : %s\n", ssl.issuedOn)
-		s += fmt.Sprintf("Expires On  : %s\n", ssl.expiresOn)
-		s += fmt.Sprintf("Issuer      : %s\n", ssl.issuer)
-		s += fmt.Sprintf("Common Name : %s\n\n", ssl.commonName)
+
+	if m.page == 0 {
+		for _, ssl := range m.ssls {
+			s += fmt.Sprintf("%s\n", ssl.domain)
+			s += fmt.Sprintf("Issued On   : %s\n", ssl.issuedOn)
+			s += fmt.Sprintf("Expires On  : %s\n", ssl.expiresOn)
+			s += fmt.Sprintf("Issuer      : %s\n", ssl.issuer)
+			s += fmt.Sprintf("Common Name : %s\n\n", ssl.commonName)
+		}
+	} else {
+		s += "Enter a domain name: \n\n"
+		s += m.input.View() + "\n\n"
 	}
 
 	// print errors
