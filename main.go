@@ -67,28 +67,44 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+
 	case tea.KeyMsg:
 		switch msg.String() {
+
 		case "tab":
 			// if page is 0, switch to 1, else 0
 			m.page = (m.page + 1) % 2
+			if m.page == 1 {
+				m.input.Focus()
+			} else {
+				m.input.Blur()
+			}
 			return m, nil
+
 		case "ctrl+c", "q":
 			return m, tea.Quit
+
 		case "enter":
-			info, err := getInfo(m.input.Value())
-			if err != nil {
-				m.err = err
+
+			// does nothing on page 0
+			if m.page == 0 {
+				return m, nil
+			} else {
+				info, err := getInfo(m.input.Value())
+				if err != nil {
+					m.err = err
+					return m, nil
+				}
+
+				// prepend to slice
+				m.ssls = append([]ssl{info}, m.ssls...)
+				m.input.SetValue("")
+				m.input.Blur()
+				m.page = 0
 				return m, nil
 			}
-
-			// prepend to slice
-			m.ssls = append([]ssl{info}, m.ssls...)
-			m.input.SetValue("")
-			m.input.Blur()
-			m.page = 0
-			return m, nil
 		}
+
 	case errMsg:
 		m.err = msg
 		return m, nil
