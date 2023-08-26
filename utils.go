@@ -21,6 +21,14 @@ func fileExists(path string) bool {
 	return !info.IsDir()
 }
 
+func saveDomain(domain, path string) error {
+	f, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return
+}
+
 // getSavedDomains reads a YAML file at the given path and unmarshals it into a config struct.
 // It then appends each domain in the config to the slice of ssl structs.
 func getSavedDomains(ssls *[]ssl, path string) error {
@@ -29,7 +37,7 @@ func getSavedDomains(ssls *[]ssl, path string) error {
 		log.Fatalf("error reading file: %v", err)
 	}
 
-	var c config
+	var c userConfig
 	if err := yaml.Unmarshal(f, &c); err != nil {
 		log.Fatalf("error unmarshalling file: %v", err)
 	}
