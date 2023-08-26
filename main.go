@@ -21,7 +21,7 @@ type model struct {
 	page  int
 }
 
-type config struct {
+type userConfig struct {
 	Domains []string `yaml:"domains"`
 }
 
@@ -84,6 +84,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
+		// save new domain to config file
+		case "A":
+			path := getConfigPath(configFolder, configFile)
+			err := saveDomain(m.input.Value(), path)
+			if err != nil {
+				m.err = err
+				return m, nil
+			}
+
 		case "enter":
 
 			// does nothing on page 0
@@ -139,7 +148,7 @@ func (m model) View() string {
 }
 
 func main() {
-	p := tea.NewProgram(initialMode(), tea.WithAltScreen())
+	p := tea.NewProgram(initialMode())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
