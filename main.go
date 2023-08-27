@@ -6,11 +6,18 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
 	configFolder = ".cert-check"
 	configFile   = "config.yaml"
+)
+
+var (
+	styleSelected = lipgloss.NewStyle().Foreground(lipgloss.Color("#E95678"))
+	styleNormal   = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFFFF"))
+	styleTitle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#FAFAFA")).Bold(true).Padding(0, 3).MarginTop(1)
 )
 
 type model struct {
@@ -142,6 +149,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	var s string
+	s += styleTitle.Render("Cert Check\n")
 
 	if m.page == 0 {
 		for i, ssl := range m.ssls {
@@ -152,14 +160,18 @@ func (m model) View() string {
 				cursor = " "
 			}
 
-			var strDomainBlock string
-			strDomainBlock += fmt.Sprintf("%s %s\n", cursor, ssl.domain)
-			strDomainBlock += fmt.Sprintf("%s Issued On   : %s\n", cursor, ssl.issuedOn)
-			strDomainBlock += fmt.Sprintf("%s Expires On  : %s\n", cursor, ssl.expiresOn)
-			strDomainBlock += fmt.Sprintf("%s Issuer      : %s\n", cursor, ssl.issuer)
-			strDomainBlock += fmt.Sprintf("%s Common Name : %s\n\n", cursor, ssl.commonName)
+			var sDomainBlock string
+			sDomainBlock += fmt.Sprintf("%s %s\n", cursor, ssl.domain)
+			sDomainBlock += fmt.Sprintf("%s Issued On   : %s\n", cursor, ssl.issuedOn)
+			sDomainBlock += fmt.Sprintf("%s Expires On  : %s\n", cursor, ssl.expiresOn)
+			sDomainBlock += fmt.Sprintf("%s Issuer      : %s\n", cursor, ssl.issuer)
+			sDomainBlock += fmt.Sprintf("%s Common Name : %s\n\n", cursor, ssl.commonName)
 
-			s += strDomainBlock
+			if m.cursor == i {
+				s += styleSelected.Render(sDomainBlock)
+			} else {
+				s += styleNormal.Render(sDomainBlock)
+			}
 		}
 	} else {
 		s += "Enter a domain name: \n\n"
