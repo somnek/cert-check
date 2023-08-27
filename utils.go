@@ -26,7 +26,22 @@ func saveDomain(domain, path string) error {
 	if err != nil {
 		return err
 	}
-	return
+	// unmarshal
+	var c userConfig
+	if err := yaml.Unmarshal(f, &c); err != nil {
+		log.Fatalf("error unmarshalling file: %v", err)
+	}
+	c.Domains = append(c.Domains, domain)
+
+	// marshal
+	newF, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+	if err = os.WriteFile(path, newF, 0644); err != nil {
+		return err
+	}
+	return nil
 }
 
 // getSavedDomains reads a YAML file at the given path and unmarshals it into a config struct.
@@ -43,14 +58,13 @@ func getSavedDomains(ssls *[]ssl, path string) error {
 	}
 
 	for _, domain := range c.Domains {
-		var newSsl ssl
+		var info ssl
 
-		newSsl, err = getInfo(domain)
+		info, err = getInfo(domain)
 		if err != nil {
 			return err
 		}
-
-		*ssls = append(*ssls, newSsl)
+		*ssls = append(*ssls, info)
 	}
 	return nil
 }
@@ -81,6 +95,7 @@ func createConfig(configFolder, configFile string) {
 func getInfo(domain string) (ssl, error) {
 	conn, err := tls.Dial("tcp", domain+":443", nil)
 	if err != nil {
+		log.Fatalf("i cannot => %v", domain)
 		return ssl{}, err
 	}
 	defer conn.Close()

@@ -14,11 +14,12 @@ const (
 )
 
 type model struct {
-	input textinput.Model
-	ssls  []ssl
-	err   error
-	logs  string
-	page  int
+	cursor int
+	input  textinput.Model
+	ssls   []ssl
+	err    error
+	logs   string
+	page   int
 }
 
 type userConfig struct {
@@ -70,6 +71,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
+
+		case "j":
+			if m.cursor < len(m.ssls)-1 {
+				m.cursor++
+			} else {
+				m.cursor = 0
+			}
+			return m, nil
+
+		case "k":
+			if m.cursor > 0 {
+				m.cursor--
+			} else {
+				m.cursor = len(m.ssls) - 1
+			}
+			return m, nil
 
 		case "tab":
 			// if page is 0, switch to 1, else 0
@@ -127,12 +144,22 @@ func (m model) View() string {
 	var s string
 
 	if m.page == 0 {
-		for _, ssl := range m.ssls {
-			s += fmt.Sprintf("%s\n", ssl.domain)
-			s += fmt.Sprintf("Issued On   : %s\n", ssl.issuedOn)
-			s += fmt.Sprintf("Expires On  : %s\n", ssl.expiresOn)
-			s += fmt.Sprintf("Issuer      : %s\n", ssl.issuer)
-			s += fmt.Sprintf("Common Name : %s\n\n", ssl.commonName)
+		for i, ssl := range m.ssls {
+			var cursor string
+			if m.cursor == i {
+				cursor = "│"
+			} else {
+				cursor = " "
+			}
+
+			var strDomainBlock string
+			strDomainBlock += fmt.Sprintf("%s %s\n", cursor, ssl.domain)
+			strDomainBlock += fmt.Sprintf("%s Issued On   : %s\n", cursor, ssl.issuedOn)
+			strDomainBlock += fmt.Sprintf("%s Expires On  : %s\n", cursor, ssl.expiresOn)
+			strDomainBlock += fmt.Sprintf("%s Issuer      : %s\n", cursor, ssl.issuer)
+			strDomainBlock += fmt.Sprintf("%s Common Name : %s\n\n", cursor, ssl.commonName)
+
+			s += strDomainBlock
 		}
 	} else {
 		s += "Enter a domain name: \n\n"
