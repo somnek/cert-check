@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -9,10 +10,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// getConfigPath returns the path to the config file
 func getConfigPath(folder, file string) string {
 	return filepath.Join(os.Getenv("HOME"), folder, file)
 }
 
+// fileExists checks if a file exists at the given path
 func fileExists(path string) bool {
 	info, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -21,31 +24,31 @@ func fileExists(path string) bool {
 	return !info.IsDir()
 }
 
+// saveDomain saves a new domain to the config file.
 func saveDomain(domain, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("error reading file: %v", err)
 	}
 	// unmarshal
 	var c userConfig
 	if err := yaml.Unmarshal(f, &c); err != nil {
-		log.Fatalf("error unmarshalling file: %v", err)
+		return fmt.Errorf("error unmarshalling file: %v", err)
 	}
 	c.Domains = append(c.Domains, domain)
 
 	// marshal
 	newF, err := yaml.Marshal(c)
 	if err != nil {
-		return err
+		return fmt.Errorf("error marshalling file: %v", err)
 	}
 	if err = os.WriteFile(path, newF, 0644); err != nil {
-		return err
+		return fmt.Errorf("error writing to file: %v", err)
 	}
 	return nil
 }
 
-// getSavedDomains reads a YAML file at the given path and unmarshals it into a config struct.
-// It then appends each domain in the config to the slice of ssl structs.
+// getSavedDomains reads the config file and returns a slice of ssl structs.
 func getSavedDomains(ssls *[]ssl, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
@@ -69,6 +72,7 @@ func getSavedDomains(ssls *[]ssl, path string) error {
 	return nil
 }
 
+// createConfig creates a config file with dummy content
 func createConfig(configFolder, configFile string) {
 	configFolderPath := getConfigPath(configFolder, "")
 	if err := os.MkdirAll(configFolderPath, 0755); err != nil {
@@ -92,6 +96,7 @@ func createConfig(configFolder, configFile string) {
 	}
 }
 
+// getInfo returns the ssl info for a given domain
 func getInfo(domain string) (ssl, error) {
 	conn, err := tls.Dial("tcp", domain+":443", nil)
 	if err != nil {

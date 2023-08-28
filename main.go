@@ -111,7 +111,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// save new domain to config file
 		case "A":
 			path := getConfigPath(configFolder, configFile)
-			err := saveDomain(m.input.Value(), path)
+			domain := m.ssls[m.cursor].domain
+			err := saveDomain(domain, path)
 			if err != nil {
 				m.err = err
 				return m, nil
