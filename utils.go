@@ -35,7 +35,7 @@ func saveDomain(domain, path string) error {
 	if err := yaml.Unmarshal(f, &c); err != nil {
 		return fmt.Errorf("error unmarshalling file: %v", err)
 	}
-	c.Domains = append(c.Domains, domain)
+	c.Domains = append([]string{domain}, c.Domains...)
 
 	// marshal
 	newF, err := yaml.Marshal(c)

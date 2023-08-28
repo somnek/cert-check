@@ -95,8 +95,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 
+		// switch between pages
+		// if page is 0, switch to 1, else 0
 		case "tab":
-			// if page is 0, switch to 1, else 0
 			m.page = (m.page + 1) % 2
 			if m.page == 1 {
 				m.input.Focus()
@@ -118,6 +119,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
+		// accept input
 		case "enter":
 
 			// does nothing on page 0
