@@ -149,30 +149,35 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	var s string
-	s += styleTitle.Render("Cert Check\n")
+	title := "Cert Check"
+	s += styleTitle.Render(title)
+	s += "\n\n"
 
 	if m.page == 0 {
 		for i, ssl := range m.ssls {
 			var cursor string
+			var style lipgloss.Style // style for each item
+
 			if m.cursor == i {
 				cursor = "│"
+				style = styleSelected
 			} else {
 				cursor = " "
+				style = styleNormal
 			}
 
-			var sDomainBlock string
-			sDomainBlock += fmt.Sprintf("%s %s\n", cursor, ssl.domain)
-			sDomainBlock += fmt.Sprintf("%s Issued On   : %s\n", cursor, ssl.issuedOn)
-			sDomainBlock += fmt.Sprintf("%s Expires On  : %s\n", cursor, ssl.expiresOn)
-			sDomainBlock += fmt.Sprintf("%s Issuer      : %s\n", cursor, ssl.issuer)
-			sDomainBlock += fmt.Sprintf("%s Common Name : %s\n\n", cursor, ssl.commonName)
-
-			if m.cursor == i {
-				s += styleSelected.Render(sDomainBlock)
-			} else {
-				s += styleNormal.Render(sDomainBlock)
-			}
+			s += style.Render(fmt.Sprintf("%s %s", cursor, ssl.domain))
+			s += "\n"
+			s += style.Render(fmt.Sprintf("%s Issued On   : %s", cursor, ssl.issuedOn))
+			s += "\n"
+			s += style.Render(fmt.Sprintf("%s Expires On  : %s", cursor, ssl.expiresOn))
+			s += "\n"
+			s += style.Render(fmt.Sprintf("%s Issuer      : %s", cursor, ssl.issuer))
+			s += "\n"
+			s += style.Render(fmt.Sprintf("%s Common Name : %s", cursor, ssl.commonName))
+			s += "\n\n"
 		}
+
 	} else {
 		s += "Enter a domain name: \n\n"
 		s += m.input.View() + "\n\n"
