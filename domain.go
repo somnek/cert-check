@@ -37,7 +37,24 @@ func deleteDomain(domain, path string) error {
 	}
 
 	// remove domain from slice
+	idx := Find(c.Domains, domain)
+	if idx == -1 {
+		return fmt.Errorf("domain not found")
+	}
+	c.Domains = Delete(c.Domains, idx)
 
+	// marshal
+	newF, err := yaml.Marshal(c)
+	if err != nil {
+		return fmt.Errorf("error marshalling file: %v", err)
+	}
+
+	// write
+	if err := os.WriteFile(path, newF, 0644); err != nil {
+		return fmt.Errorf("error writing to file: %v", err)
+	}
+
+	return nil
 }
 
 // saveDomain saves a new domain to the config file.

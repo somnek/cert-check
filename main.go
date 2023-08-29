@@ -112,6 +112,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
+		// delete domain from config file
+		case "x":
+			path := getConfigPath(configFolder, configFile)
+			domain := m.ssls[m.cursor].domain
+			if err := deleteDomain(domain, path); err != nil {
+				m.err = err
+				return m, nil
+			}
+
 		// save new domain to config file
 		case "A":
 			path := getConfigPath(configFolder, configFile)
