@@ -120,6 +120,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.err = err
 				return m, nil
 			}
+			m.ssls = Delete(m.ssls, m.cursor)
+			return m, nil
 
 		// save new domain to config file
 		case "A":
