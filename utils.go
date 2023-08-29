@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -52,12 +51,12 @@ func saveDomain(domain, path string) error {
 func getSavedDomains(ssls *[]ssl, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatalf("error reading file: %v", err)
+		return fmt.Errorf("error reading file: %v", err)
 	}
 
 	var c userConfig
 	if err := yaml.Unmarshal(f, &c); err != nil {
-		log.Fatalf("error unmarshalling file: %v", err)
+		return fmt.Errorf("error unmarshalling file: %v", err)
 	}
 
 	for _, domain := range c.Domains {
@@ -73,16 +72,17 @@ func getSavedDomains(ssls *[]ssl, path string) error {
 }
 
 // createConfig creates a config file with dummy content
-func createConfig(configFolder, configFile string) {
+func createConfig(configFolder, configFile string) error {
 	configFolderPath := getConfigPath(configFolder, "")
 	if err := os.MkdirAll(configFolderPath, 0755); err != nil {
-		log.Fatalf("error creating folder: %v", err)
+		return fmt.Errorf("error creating folder: %v", err)
 	}
 
 	configFilePath := getConfigPath(configFolder, configFile)
 	f, err := os.Create(configFilePath)
 	if err != nil {
-		log.Fatalf("error creating file: %v", err)
+		return fmt.Errorf("error creating file: %v", err)
+
 	}
 	defer f.Close()
 
@@ -92,16 +92,17 @@ func createConfig(configFolder, configFile string) {
 - x.com`
 
 	if _, err = f.WriteString(dummyContent); err != nil {
-		log.Fatalf("error writing to file: %v", err)
+		return fmt.Errorf("error writing to file: %v", err)
 	}
+
+	return nil
 }
 
 // getInfo returns the ssl info for a given domain
 func getInfo(domain string) (ssl, error) {
 	conn, err := tls.Dial("tcp", domain+":443", nil)
 	if err != nil {
-		log.Fatalf("i cannot => %v", domain)
-		return ssl{}, err
+		return ssl{}, fmt.Errorf("error dialing domain: %v", err)
 	}
 	defer conn.Close()
 

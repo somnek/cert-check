@@ -16,8 +16,8 @@ const (
 
 var (
 	styleSelected = lipgloss.NewStyle().Foreground(lipgloss.Color("#E95678"))
-	styleNormal   = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFFFF"))
-	styleTitle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#FAFAFA")).Bold(true).Padding(0, 3).MarginTop(1)
+	styleNormal   = lipgloss.NewStyle().Foreground(lipgloss.Color("#CDCDCD"))
+	styleTitle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#E3E4DB")).Bold(true).Padding(0, 3).MarginTop(1)
 )
 
 type model struct {
@@ -46,7 +46,10 @@ type ssl struct {
 func initialMode() model {
 	configPath := getConfigPath(configFolder, configFile)
 	if !fileExists(configPath) {
-		createConfig(configFolder, configFile)
+		err := createConfig(configFolder, configFile)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	var initSsls []ssl
@@ -195,7 +198,7 @@ func (m model) View() string {
 }
 
 func main() {
-	p := tea.NewProgram(initialMode())
+	p := tea.NewProgram(initialMode(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
