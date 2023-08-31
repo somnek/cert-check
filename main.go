@@ -74,6 +74,91 @@ func (m model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
+func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "j":
+			if m.cursor < len(m.ssls)-1 {
+				m.cursor++
+			} else {
+				m.cursor = 0
+			}
+			return m, nil
+
+		case "k":
+			if m.cursor > 0 {
+				m.cursor--
+			} else {
+				m.cursor = len(m.ssls) - 1
+			}
+			return m, nil
+
+		case "q":
+			return m, tea.Quit
+
+		// delete domain from config file
+		case "x":
+			path := getConfigPath(configFolder, configFile)
+			domain := m.ssls[m.cursor].domain
+			if err := deleteDomain(domain, path); err != nil {
+				m.err = err
+				return m, nil
+			}
+			m.ssls = Delete(m.ssls, m.cursor)
+			return m, nil
+
+		// save new domain to config file
+		case "a":
+			path := getConfigPath(configFolder, configFile)
+			domain := m.ssls[m.cursor].domain
+			err := saveDomain(domain, path)
+			if err != nil {
+				m.err = err
+				return m, nil
+			}
+		}
+	}
+	return m, nil
+}
+
+func updateInputPage(msg tea.Msg, m model, cmd *tea.Cmd) (tea.Model, tea.Cmd) {
+	m.input, *cmd = m.input.Update(msg)
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+
+		case "enter":
+			inputSanitized := Sanitize(m.input.Value())
+			info, err := getInfo(inputSanitized)
+			if err != nil {
+				m.err = err
+				return m, nil
+			}
+
+			// check if domain already exists
+			domains := ExtractField(m.ssls, "domain")
+			idx := Find(domains, inputSanitized)
+
+			if idx != -1 {
+				// replace existing domain's info
+				m.ssls[idx] = info
+			} else {
+				// prepend to slice
+				m.ssls = append([]ssl{info}, m.ssls...)
+			}
+
+			m.input.SetValue("")
+			m.input.Blur()
+			m.page = 0
+			return m, nil
+		}
+	}
+	return m, *cmd
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -82,90 +167,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 
-		case "j":
-			if m.page == 0 {
-				if m.cursor < len(m.ssls)-1 {
-					m.cursor++
-				} else {
-					m.cursor = 0
-				}
-				return m, nil
-			}
-
-		case "k":
-			if m.page == 0 {
-				if m.cursor > 0 {
-					m.cursor--
-				} else {
-					m.cursor = len(m.ssls) - 1
-				}
-				return m, nil
-			}
-
 		// switch between pages
 		// if page is 0, switch to 1, else 0
 		case "tab":
 			m.page = (m.page + 1) % 2
-			if m.page == 1 {
-				m.input.Focus()
-			} else {
+			if m.page == 0 {
 				m.input.Blur()
+			} else {
+				m.input.Focus()
 			}
 			return m, nil
 
 		case "ctrl+c", "esc":
 			return m, tea.Quit
-
-		case "q":
-			if m.page == 0 {
-				return m, tea.Quit
-			}
-
-		// delete domain from config file
-		case "X":
-			if m.page == 0 {
-				path := getConfigPath(configFolder, configFile)
-				domain := m.ssls[m.cursor].domain
-				if err := deleteDomain(domain, path); err != nil {
-					m.err = err
-					return m, nil
-				}
-				m.ssls = Delete(m.ssls, m.cursor)
-				return m, nil
-			}
-
-		// save new domain to config file
-		case "A":
-			if m.page == 0 {
-				path := getConfigPath(configFolder, configFile)
-				domain := m.ssls[m.cursor].domain
-				err := saveDomain(domain, path)
-				if err != nil {
-					m.err = err
-					return m, nil
-				}
-			}
-
-		// accept input
-		case "enter":
-
-			// does nothing on page 0
-			if m.page == 0 {
-				return m, nil
-			} else {
-				info, err := getInfo(Sanitize(m.input.Value()))
-				if err != nil {
-					m.err = err
-					return m, nil
-				}
-
-				// prepend to slice
-				m.ssls = append([]ssl{info}, m.ssls...)
-				m.input.SetValue("")
-				m.input.Blur()
-				m.page = 0
-				return m, nil
-			}
 		}
 
 	case errMsg:
@@ -173,8 +187,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	m.input, cmd = m.input.Update(msg)
-	return m, cmd
+	if m.page == 0 {
+		return updateListPage(msg, m)
+	} else {
+		return updateInputPage(msg, m, &cmd)
+	}
 }
 
 func (m model) View() string {
