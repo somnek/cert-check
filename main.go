@@ -83,20 +83,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 
 		case "j":
-			if m.cursor < len(m.ssls)-1 {
-				m.cursor++
-			} else {
-				m.cursor = 0
+			if m.page == 0 {
+				if m.cursor < len(m.ssls)-1 {
+					m.cursor++
+				} else {
+					m.cursor = 0
+				}
+				return m, nil
 			}
-			return m, nil
 
 		case "k":
-			if m.cursor > 0 {
-				m.cursor--
-			} else {
-				m.cursor = len(m.ssls) - 1
+			if m.page == 0 {
+				if m.cursor > 0 {
+					m.cursor--
+				} else {
+					m.cursor = len(m.ssls) - 1
+				}
+				return m, nil
 			}
-			return m, nil
 
 		// switch between pages
 		// if page is 0, switch to 1, else 0
@@ -109,28 +113,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 
-		case "ctrl+c", "q":
+		case "ctrl+c", "esc":
 			return m, tea.Quit
 
+		case "q":
+			if m.page == 0 {
+				return m, tea.Quit
+			}
+
 		// delete domain from config file
-		case "x":
-			path := getConfigPath(configFolder, configFile)
-			domain := m.ssls[m.cursor].domain
-			if err := deleteDomain(domain, path); err != nil {
-				m.err = err
+		case "X":
+			if m.page == 0 {
+				path := getConfigPath(configFolder, configFile)
+				domain := m.ssls[m.cursor].domain
+				if err := deleteDomain(domain, path); err != nil {
+					m.err = err
+					return m, nil
+				}
+				m.ssls = Delete(m.ssls, m.cursor)
 				return m, nil
 			}
-			m.ssls = Delete(m.ssls, m.cursor)
-			return m, nil
 
 		// save new domain to config file
 		case "A":
-			path := getConfigPath(configFolder, configFile)
-			domain := m.ssls[m.cursor].domain
-			err := saveDomain(domain, path)
-			if err != nil {
-				m.err = err
-				return m, nil
+			if m.page == 0 {
+				path := getConfigPath(configFolder, configFile)
+				domain := m.ssls[m.cursor].domain
+				err := saveDomain(domain, path)
+				if err != nil {
+					m.err = err
+					return m, nil
+				}
 			}
 
 		// accept input
