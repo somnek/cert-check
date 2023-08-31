@@ -153,7 +153,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.page == 0 {
 				return m, nil
 			} else {
-				info, err := getInfo(m.input.Value())
+				info, err := getInfo(Sanitize(m.input.Value()))
 				if err != nil {
 					m.err = err
 					return m, nil
