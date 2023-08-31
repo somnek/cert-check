@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -98,7 +100,7 @@ func getSavedDomains(ssls *[]ssl, path string) error {
 	for _, domain := range c.Domains {
 		var info ssl
 
-		info, err = getInfo(domain)
+		info, err = GetInfo(domain)
 		if err != nil {
 			return err
 		}
@@ -134,11 +136,20 @@ func createConfig(configFolder, configFile string) error {
 	return nil
 }
 
-// getInfo returns the ssl info for a given domain
-func getInfo(domain string) (ssl, error) {
-	conn, err := tls.Dial("tcp", domain+":443", nil)
+// GetInfo returns the ssl info for a given domain
+func GetInfo(domain string) (ssl, error) {
+	// create a custom Dialer with a timeout value
+	Dialer := &net.Dialer{
+		Timeout: 1 * time.Second,
+	}
+
+	conn, err := tls.DialWithDialer(Dialer, "tcp", domain+":443", nil)
 	if err != nil {
-		return ssl{}, fmt.Errorf("error dialing domain: %v", err)
+		// check whether it is a timeout error
+		if e, ok := err.(net.Error); ok && e.Timeout() {
+			return ssl{}, fmt.Errorf("timeout error: %v", err)
+		}
+		return ssl{}, fmt.Errorf("error dialing: %v", err)
 	}
 	defer conn.Close()
 

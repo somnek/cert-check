@@ -132,7 +132,7 @@ func updateInputPage(msg tea.Msg, m model, cmd *tea.Cmd) (tea.Model, tea.Cmd) {
 
 		case "enter":
 			inputSanitized := Sanitize(m.input.Value())
-			info, err := getInfo(inputSanitized)
+			info, err := GetInfo(inputSanitized)
 			if err != nil {
 				m.err = err
 				return m, nil
