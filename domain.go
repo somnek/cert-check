@@ -12,12 +12,12 @@ import (
 )
 
 // getConfigPath returns the path to the config file
-func getConfigPath(folder, file string) string {
+func GetConfigPath(folder, file string) string {
 	return filepath.Join(os.Getenv("HOME"), folder, file)
 }
 
 // fileExists checks if a file exists at the given path
-func fileExists(path string) bool {
+func FileExists(path string) bool {
 	info, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return false
@@ -26,7 +26,7 @@ func fileExists(path string) bool {
 }
 
 // deleteDomain remove domain from config file
-func deleteDomain(domain, path string) error {
+func DeleteDomain(domain, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("error reading file: %v", err)
@@ -60,7 +60,7 @@ func deleteDomain(domain, path string) error {
 }
 
 // saveDomain saves a new domain to the config file.
-func saveDomain(domain, path string) error {
+func SaveDomain(domain, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("error reading file: %v", err)
@@ -86,7 +86,7 @@ func saveDomain(domain, path string) error {
 }
 
 // getSavedDomains reads the config file and returns a slice of ssl structs.
-func getSavedDomains(ssls *[]ssl, path string) error {
+func GetSavedDomains(ssls *[]ssl, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("error reading file: %v", err)
@@ -110,13 +110,13 @@ func getSavedDomains(ssls *[]ssl, path string) error {
 }
 
 // createConfig creates a config file with dummy content
-func createConfig(configFolder, configFile string) error {
-	configFolderPath := getConfigPath(configFolder, "")
+func CreateConfig(configFolder, configFile string) error {
+	configFolderPath := GetConfigPath(configFolder, "")
 	if err := os.MkdirAll(configFolderPath, 0755); err != nil {
 		return fmt.Errorf("error creating folder: %v", err)
 	}
 
-	configFilePath := getConfigPath(configFolder, configFile)
+	configFilePath := GetConfigPath(configFolder, configFile)
 	f, err := os.Create(configFilePath)
 	if err != nil {
 		return fmt.Errorf("error creating file: %v", err)

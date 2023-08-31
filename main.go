@@ -44,16 +44,16 @@ type ssl struct {
 }
 
 func initialMode() model {
-	configPath := getConfigPath(configFolder, configFile)
-	if !fileExists(configPath) {
-		err := createConfig(configFolder, configFile)
+	configPath := GetConfigPath(configFolder, configFile)
+	if !FileExists(configPath) {
+		err := CreateConfig(configFolder, configFile)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	var initSsls []ssl
-	err := getSavedDomains(&initSsls, configPath)
+	err := GetSavedDomains(&initSsls, configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,9 +100,9 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 
 		// delete domain from config file
 		case "x":
-			path := getConfigPath(configFolder, configFile)
+			path := GetConfigPath(configFolder, configFile)
 			domain := m.ssls[m.cursor].domain
-			if err := deleteDomain(domain, path); err != nil {
+			if err := DeleteDomain(domain, path); err != nil {
 				m.err = err
 				return m, nil
 			}
@@ -111,9 +111,9 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 
 		// save new domain to config file
 		case "a":
-			path := getConfigPath(configFolder, configFile)
+			path := GetConfigPath(configFolder, configFile)
 			domain := m.ssls[m.cursor].domain
-			err := saveDomain(domain, path)
+			err := SaveDomain(domain, path)
 			if err != nil {
 				m.err = err
 				return m, nil
