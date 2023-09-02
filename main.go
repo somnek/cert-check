@@ -107,17 +107,17 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			m.ssls = Delete(m.ssls, m.cursor)
+			m.logs += "deleted " + domain + "\n"
 			return m, nil
 
 		// save new domain to config file
 		case "a":
 			path := GetConfigPath(configFolder, configFile)
 			domain := m.ssls[m.cursor].domain
-			err := SaveDomain(domain, path)
-			if err != nil {
+			if err := SaveDomain(domain, path); err != nil {
 				m.err = err
-				return m, nil
 			}
+			return m, nil
 		}
 	}
 	return m, nil
@@ -201,6 +201,13 @@ func (m model) View() string {
 	s += "\n\n"
 
 	if m.page == 0 {
+		// logs
+		if m.logs != "" {
+			s += m.logs
+			s += "\n"
+		}
+
+		// domain list
 		for i, ssl := range m.ssls {
 			var cursor string
 			var style lipgloss.Style // style for each item
@@ -226,6 +233,7 @@ func (m model) View() string {
 		}
 
 	} else {
+		// input
 		s += "Enter a domain name: \n\n"
 		s += m.input.View() + "\n\n"
 	}
