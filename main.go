@@ -102,7 +102,7 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		case "x":
 			path := GetConfigPath(configFolder, configFile)
 			domain := m.ssls[m.cursor].domain
-			if err := DeleteDomain(domain, path); err != nil {
+			if err := DeleteFromConfig(domain, path); err != nil {
 				m.err = err
 				return m, nil
 			}

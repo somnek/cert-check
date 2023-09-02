@@ -11,6 +11,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	dialTimeout = 2 * time.Second
+)
+
 // getConfigPath returns the path to the config file
 func GetConfigPath(folder, file string) string {
 	return filepath.Join(os.Getenv("HOME"), folder, file)
@@ -26,7 +30,7 @@ func FileExists(path string) bool {
 }
 
 // deleteDomain remove domain from config file
-func DeleteDomain(domain, path string) error {
+func DeleteFromConfig(domain, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("error reading file: %v", err)
@@ -41,7 +45,7 @@ func DeleteDomain(domain, path string) error {
 	// remove domain from slice
 	idx := Find(c.Domains, domain)
 	if idx == -1 {
-		return fmt.Errorf("domain not found")
+		return nil
 	}
 	c.Domains = Delete(c.Domains, idx)
 
@@ -140,7 +144,7 @@ func CreateConfig(configFolder, configFile string) error {
 func GetInfo(domain string) (ssl, error) {
 	// create a custom Dialer with a timeout value
 	Dialer := &net.Dialer{
-		Timeout: 1 * time.Second,
+		Timeout: dialTimeout,
 	}
 
 	conn, err := tls.DialWithDialer(Dialer, "tcp", domain+":443", nil)
