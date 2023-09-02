@@ -53,7 +53,7 @@ func initialMode() model {
 	}
 
 	var initSsls []ssl
-	err := GetSavedDomains(&initSsls, configPath)
+	err := LoadSavedDomains(&initSsls, configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -114,8 +114,18 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		case "a":
 			path := GetConfigPath(configFolder, configFile)
 			domain := m.ssls[m.cursor].domain
-			if err := SaveDomain(domain, path); err != nil {
+			savedDomains, err := GetSavedDomains(path)
+			if err != nil {
 				m.err = err
+			}
+			idx := Find(savedDomains, domain)
+			if idx == -1 {
+				// save domain to config file if it doesn't already exist
+				if err := SaveDomain(domain, path); err != nil {
+					m.err = err
+				}
+			} else {
+				m.logs += domain + " is already added\n"
 			}
 			return m, nil
 		}
@@ -201,6 +211,8 @@ func (m model) View() string {
 	s += "\n\n"
 
 	if m.page == 0 {
+		// page 0: domain view
+
 		// logs
 		if m.logs != "" {
 			s += m.logs
@@ -233,7 +245,7 @@ func (m model) View() string {
 		}
 
 	} else {
-		// input
+		// page 1: input view
 		s += "Enter a domain name: \n\n"
 		s += m.input.View() + "\n\n"
 	}

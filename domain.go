@@ -15,12 +15,12 @@ const (
 	dialTimeout = 2 * time.Second
 )
 
-// getConfigPath returns the path to the config file
+// GetConfigPath returns the path to the config file
 func GetConfigPath(folder, file string) string {
 	return filepath.Join(os.Getenv("HOME"), folder, file)
 }
 
-// fileExists checks if a file exists at the given path
+// FileExists checks if a file exists at the given path
 func FileExists(path string) bool {
 	info, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -29,7 +29,7 @@ func FileExists(path string) bool {
 	return !info.IsDir()
 }
 
-// deleteDomain remove domain from config file
+// DeleteDomain remove domain from config file
 func DeleteFromConfig(domain, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
@@ -63,7 +63,7 @@ func DeleteFromConfig(domain, path string) error {
 	return nil
 }
 
-// saveDomain saves a new domain to the config file.
+// SaveDomain saves a new domain to the config file.
 func SaveDomain(domain, path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
@@ -89,19 +89,34 @@ func SaveDomain(domain, path string) error {
 	return nil
 }
 
-// getSavedDomains reads the config file and returns a slice of ssl structs.
-func GetSavedDomains(ssls *[]ssl, path string) error {
+func GetSavedDomains(path string) ([]string, error) {
+	domains := []string{}
+
 	f, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("error reading file: %v", err)
+		return nil, fmt.Errorf("error reading file: %v", err)
 	}
 
 	var c userConfig
 	if err := yaml.Unmarshal(f, &c); err != nil {
-		return fmt.Errorf("error unmarshalling file: %v", err)
+		return nil, fmt.Errorf("error unmarshalling file: %v", err)
 	}
 
 	for _, domain := range c.Domains {
+		domains = append(domains, domain)
+	}
+
+	return domains, err
+}
+
+// LoadSavedDomains reads the config file set the ssl info for each domain
+func LoadSavedDomains(ssls *[]ssl, path string) error {
+	savedDomains, err := GetSavedDomains(path)
+	if err != nil {
+		return err
+	}
+
+	for _, domain := range savedDomains {
 		var info ssl
 
 		info, err = GetInfo(domain)
@@ -113,7 +128,7 @@ func GetSavedDomains(ssls *[]ssl, path string) error {
 	return nil
 }
 
-// createConfig creates a config file with dummy content
+// CreateConfig creates a config file with dummy content
 func CreateConfig(configFolder, configFile string) error {
 	configFolderPath := GetConfigPath(configFolder, "")
 	if err := os.MkdirAll(configFolderPath, 0755); err != nil {
