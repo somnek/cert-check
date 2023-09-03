@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,7 +18,8 @@ const (
 var (
 	styleSelected = lipgloss.NewStyle().Foreground(lipgloss.Color("#E95678"))
 	styleNormal   = lipgloss.NewStyle().Foreground(lipgloss.Color("#CDCDCD"))
-	styleTitle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#E3E4DB")).Bold(true).Padding(0, 3).MarginTop(1)
+	styleTitle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#E3E4DB")).Background(lipgloss.Color("#57886C")).Bold(true).Padding(0, 3).MarginTop(1)
+	styleHelper   = lipgloss.NewStyle().Foreground(lipgloss.Color("#5e5e5e")).MarginLeft(1)
 )
 
 type model struct {
@@ -79,6 +81,11 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
+
+		case "a", "A":
+			m.page = 1
+			return m, nil
+
 		case "j":
 			if m.cursor < len(m.ssls)-1 {
 				m.cursor++
@@ -98,8 +105,8 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		case "q":
 			return m, tea.Quit
 
-		// delete domain from config file
-		case "x":
+			// delete domain from config file
+		case "d", "D":
 			path := GetConfigPath(configFolder, configFile)
 			domain := m.ssls[m.cursor].domain
 			if err := DeleteFromConfig(domain, path); err != nil {
@@ -111,7 +118,7 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		// save new domain to config file
-		case "a":
+		case "s", "S":
 			path := GetConfigPath(configFolder, configFile)
 			domain := m.ssls[m.cursor].domain
 			savedDomains, err := GetSavedDomains(path)
@@ -205,18 +212,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	var s string
+	var b strings.Builder
 	title := "Cert Check"
-	s += styleTitle.Render(title)
-	s += "\n\n"
-
+	b.WriteString(styleTitle.Render(title))
+	b.WriteString("\n\n")
 	if m.page == 0 {
 		// page 0: domain view
 
 		// logs
 		if m.logs != "" {
-			s += m.logs
-			s += "\n"
+			b.WriteString(m.logs)
+			b.WriteString("\n")
 		}
 
 		// domain list
@@ -232,30 +238,31 @@ func (m model) View() string {
 				style = styleNormal
 			}
 
-			s += style.Render(fmt.Sprintf("%s %s", cursor, ssl.domain))
-			s += "\n"
-			s += style.Render(fmt.Sprintf("%s Issued On   : %s", cursor, ssl.issuedOn))
-			s += "\n"
-			s += style.Render(fmt.Sprintf("%s Expires On  : %s", cursor, ssl.expiresOn))
-			s += "\n"
-			s += style.Render(fmt.Sprintf("%s Issuer      : %s", cursor, ssl.issuer))
-			s += "\n"
-			s += style.Render(fmt.Sprintf("%s Common Name : %s", cursor, ssl.commonName))
-			s += "\n\n"
+			b.WriteString(style.Render(fmt.Sprintf("%s %s", cursor, ssl.domain)))
+			b.WriteString("\n")
+			b.WriteString(style.Render(fmt.Sprintf("%s Issued On   : %s", cursor, ssl.issuedOn)))
+			b.WriteString("\n")
+			b.WriteString(style.Render(fmt.Sprintf("%s Expires On  : %s", cursor, ssl.expiresOn)))
+			b.WriteString("\n")
+			b.WriteString(style.Render(fmt.Sprintf("%s Issuer      : %s", cursor, ssl.issuer)))
+			b.WriteString("\n")
+			b.WriteString(style.Render(fmt.Sprintf("%s Common Name : %s", cursor, ssl.commonName)))
+			b.WriteString("\n\n")
 		}
 
 	} else {
 		// page 1: input view
-		s += "Enter a domain name: \n\n"
-		s += m.input.View() + "\n\n"
+		b.WriteString("Enter a domain name: \n\n")
+		b.WriteString(m.input.View() + "\n\n")
 	}
 
 	// print errors
 	if m.err != nil {
-		s += m.err.Error()
+		b.WriteString(m.err.Error())
 	}
 
-	return s
+	b.WriteString(styleHelper.Render("j/k ↑/↓ select • q: quit • tab: switch page • d: delete • a: add\n"))
+	return b.String()
 }
 
 func main() {

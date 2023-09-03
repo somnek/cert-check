@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	dialTimeout = 2 * time.Second
+	dialTimeout = 5 * time.Second
 )
 
 // GetConfigPath returns the path to the config file
