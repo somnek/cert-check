@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -26,9 +25,9 @@ const (
 var (
 	styleSelected = lipgloss.NewStyle().Foreground(COLOR_PINK)
 	styleNormal   = lipgloss.NewStyle().Foreground(COLOR_GRAY_1)
-	styleTitle    = lipgloss.NewStyle().Foreground(COLOR_GRAY_2).Background(COLOR_DARK_GREEN).Bold(true).Padding(0, 3).MarginTop(1)
-	styleHelper1  = lipgloss.NewStyle().Foreground(COLOR_GRAY_4).MarginLeft(1)
-	styleHelper2  = lipgloss.NewStyle().Foreground(COLOR_GRAY_3).MarginLeft(1)
+	styleTitle    = lipgloss.NewStyle().Foreground(COLOR_GRAY_2).Background(COLOR_DARK_GREEN).Bold(true)
+	styleHelper1  = lipgloss.NewStyle().Foreground(COLOR_GRAY_4)
+	styleHelper2  = lipgloss.NewStyle().Foreground(COLOR_GRAY_3)
 )
 
 type model struct {
@@ -251,24 +250,15 @@ func (m model) View() string {
 				style = styleNormal
 			}
 
-			b.WriteString(style.Render(fmt.Sprintf("%s %s", cursor, ssl.domain)))
-			b.WriteString("\n")
-			b.WriteString(style.Render(fmt.Sprintf("%s Issued On   : %s", cursor, ssl.issuedOn)))
-			b.WriteString("\n")
-			b.WriteString(style.Render(fmt.Sprintf("%s Expires On  : %s", cursor, ssl.expiresOn)))
-			b.WriteString("\n")
-			b.WriteString(style.Render(fmt.Sprintf("%s Issuer      : %s", cursor, ssl.issuer)))
-			b.WriteString("\n")
-			b.WriteString(style.Render(fmt.Sprintf("%s Common Name : %s", cursor, ssl.commonName)))
-			b.WriteString("\n\n")
+			writeDomainList(&b, ssl, style, cursor)
 		}
 
 		// print errors
 		if m.err != nil {
-			b.WriteString(m.err.Error())
+			b.WriteString(m.err.Error() + "\n\n")
 		}
 
-		renderPageControls(&b, m.page)
+		writePageControls(&b, m.page)
 
 	} else {
 		// page 1: input view
@@ -277,14 +267,15 @@ func (m model) View() string {
 
 		// print errors
 		if m.err != nil {
-			b.WriteString(m.err.Error() + "\n")
+			b.WriteString(m.err.Error() + "\n\n")
 		}
 
-		renderPageControls(&b, m.page)
+		writePageControls(&b, m.page)
 
 	}
 
-	return b.String()
+	containerStyle := lipgloss.NewStyle().Margin(MARGIN).Padding(PADDING)
+	return containerStyle.Render(b.String())
 }
 
 func main() {
