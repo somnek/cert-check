@@ -11,15 +11,24 @@ import (
 )
 
 const (
-	configFolder = ".cert-check"
-	configFile   = "config.yaml"
+	configFolder     = ".cert-check"
+	configFile       = "config.yaml"
+	MARGIN           = 2
+	PADDING          = 1
+	COLOR_PINK       = lipgloss.Color("#E95678")
+	COLOR_GRAY_1     = lipgloss.Color("#E3E4DB")
+	COLOR_GRAY_2     = lipgloss.Color("#CDCDCD")
+	COLOR_GRAY_3     = lipgloss.Color("#B8BABA")
+	COLOR_GRAY_4     = lipgloss.Color("#626262")
+	COLOR_DARK_GREEN = lipgloss.Color("#57886C")
 )
 
 var (
-	styleSelected = lipgloss.NewStyle().Foreground(lipgloss.Color("#E95678"))
-	styleNormal   = lipgloss.NewStyle().Foreground(lipgloss.Color("#CDCDCD"))
-	styleTitle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#E3E4DB")).Background(lipgloss.Color("#57886C")).Bold(true).Padding(0, 3).MarginTop(1)
-	styleHelper   = lipgloss.NewStyle().Foreground(lipgloss.Color("#5e5e5e")).MarginLeft(1)
+	styleSelected = lipgloss.NewStyle().Foreground(COLOR_PINK)
+	styleNormal   = lipgloss.NewStyle().Foreground(COLOR_GRAY_1)
+	styleTitle    = lipgloss.NewStyle().Foreground(COLOR_GRAY_2).Background(COLOR_DARK_GREEN).Bold(true).Padding(0, 3).MarginTop(1)
+	styleHelper1  = lipgloss.NewStyle().Foreground(COLOR_GRAY_4).MarginLeft(1)
+	styleHelper2  = lipgloss.NewStyle().Foreground(COLOR_GRAY_3).MarginLeft(1)
 )
 
 type model struct {
@@ -214,8 +223,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	var b strings.Builder
 	title := "Cert Check"
+
 	b.WriteString(styleTitle.Render(title))
 	b.WriteString("\n\n")
+
 	if m.page == 0 {
 		// page 0: domain view
 
@@ -250,18 +261,27 @@ func (m model) View() string {
 			b.WriteString("\n\n")
 		}
 
+		// print errors
+		if m.err != nil {
+			b.WriteString(m.err.Error())
+		}
+
+		renderPageControls(&b, m.page)
+
 	} else {
 		// page 1: input view
 		b.WriteString("Enter a domain name: \n\n")
 		b.WriteString(m.input.View() + "\n\n")
+
+		// print errors
+		if m.err != nil {
+			b.WriteString(m.err.Error() + "\n")
+		}
+
+		renderPageControls(&b, m.page)
+
 	}
 
-	// print errors
-	if m.err != nil {
-		b.WriteString(m.err.Error())
-	}
-
-	b.WriteString(styleHelper.Render("j/k ↑/↓ select • q: quit • tab: switch page • d: delete • a: add\n"))
 	return b.String()
 }
 
