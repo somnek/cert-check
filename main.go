@@ -200,8 +200,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.page == 0 {
 				m.input.Blur()
 			} else {
+				m.input.SetValue("")
 				m.input.Focus()
 			}
+			m.err = nil
 			return m, nil
 
 		case "ctrl+c", "esc":
