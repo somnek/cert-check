@@ -1,6 +1,25 @@
 package main
 
-import "strings"
+import (
+	"log"
+	"net/url"
+	"strings"
+)
+
+func hasScheme(rawUrl string) bool {
+	return strings.HasPrefix(rawUrl, "http://") || strings.HasPrefix(rawUrl, "https://")
+}
+
+func ExtractHost(rawUrl string) string {
+	if hasScheme(rawUrl) {
+		u, err := url.Parse(rawUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return u.Host
+	}
+	return rawUrl
+}
 
 // ExtractField returns a slice of values for a given field
 func ExtractField(ssls []ssl, f string) []string {
@@ -27,6 +46,7 @@ func ExtractField(ssls []ssl, f string) []string {
 func Sanitize(s string) string {
 	s = strings.ReplaceAll(s, " ", "")
 	s = strings.ToLower(s)
+	s = ExtractHost(s)
 	return s
 }
 
