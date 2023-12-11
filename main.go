@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -124,26 +126,8 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			m.ssls = Delete(m.ssls, m.cursor)
 			m.logs += "deleted " + domain + "\n"
 			return m, nil
-
-		// save new domain to config file
-		case "s", "S":
-			path := GetConfigPath(configFolder, configFile)
-			domain := m.ssls[m.cursor].domain
-			savedDomains, err := GetSavedDomains(path)
-			if err != nil {
-				m.err = err
-			}
-			idx := Find(savedDomains, domain)
-			if idx == -1 {
-				// save domain to config file if it doesn't already exist
-				if err := SaveDomain(domain, path); err != nil {
-					m.err = err
-				}
-			} else {
-				m.logs += domain + " is already added\n"
-			}
-			return m, nil
 		}
+
 	}
 	return m, nil
 }
@@ -173,6 +157,13 @@ func updateInputPage(msg tea.Msg, m model, cmd *tea.Cmd) (tea.Model, tea.Cmd) {
 			} else {
 				// prepend to slice
 				m.ssls = append([]ssl{info}, m.ssls...)
+
+				// save domain to config file
+				path := GetConfigPath(configFolder, configFile)
+				if err := SaveDomain(inputSanitized, path); err != nil {
+					m.err = err
+				}
+				m.logs = "added " + inputSanitized + "\n"
 			}
 
 			m.input.SetValue("")
@@ -279,6 +270,13 @@ func (m model) View() string {
 }
 
 func main() {
+	f, err := tea.LogToFile("debug.log", "debug")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer f.Close()
+
 	p := tea.NewProgram(initialMode(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
