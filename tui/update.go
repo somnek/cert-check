@@ -9,6 +9,8 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 
 		case "a", "A":
+			m.input.SetValue("")
+			m.input.Focus()
 			m.page = 1
 			return m, nil
 
