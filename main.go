@@ -102,6 +102,7 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			} else {
 				m.cursor = 0
 			}
+			m.logs = ""
 			return m, nil
 
 		case "k":
@@ -110,6 +111,7 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			} else {
 				m.cursor = len(m.ssls) - 1
 			}
+			m.logs = ""
 			return m, nil
 
 		case "q":
@@ -124,7 +126,7 @@ func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			m.ssls = Delete(m.ssls, m.cursor)
-			m.logs += "deleted " + domain + "\n"
+			m.logs = "deleted " + domain + "\n"
 			return m, nil
 		}
 
@@ -222,12 +224,6 @@ func (m model) View() string {
 	if m.page == 0 {
 		// page 0: domain view
 
-		// logs
-		if m.logs != "" {
-			b.WriteString(m.logs)
-			b.WriteString("\n")
-		}
-
 		// domain list
 		for i, ssl := range m.ssls {
 			var cursor string
@@ -249,6 +245,10 @@ func (m model) View() string {
 			b.WriteString(m.err.Error() + "\n\n")
 		}
 
+		// logs
+		b.WriteString(m.logs)
+		b.WriteString("\n")
+
 		writePageControls(&b, m.page)
 
 	} else {
@@ -262,7 +262,6 @@ func (m model) View() string {
 		}
 
 		writePageControls(&b, m.page)
-
 	}
 
 	containerStyle := lipgloss.NewStyle().Margin(MARGIN).Padding(PADDING)

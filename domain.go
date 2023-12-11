@@ -102,10 +102,7 @@ func GetSavedDomains(path string) ([]string, error) {
 		return nil, fmt.Errorf("error unmarshalling file: %v", err)
 	}
 
-	for _, domain := range c.Domains {
-		domains = append(domains, domain)
-	}
-
+	domains = append(domains, c.Domains...)
 	return domains, err
 }
 
