@@ -1,6 +1,10 @@
 package tui
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+type errMsg error
 
 func updateListPage(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 

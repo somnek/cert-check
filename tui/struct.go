@@ -1,6 +1,15 @@
 package tui
 
-import "github.com/charmbracelet/bubbles/textinput"
+import (
+	"github.com/charmbracelet/bubbles/textinput"
+)
+
+const (
+	home page = iota
+	form
+)
+
+type page int
 
 type model struct {
 	cursor int
@@ -8,14 +17,12 @@ type model struct {
 	ssls   []ssl
 	err    error
 	logs   string
-	page   int
+	page   page
 }
 
 type userConfig struct {
 	Domains []string `yaml:"domains"`
 }
-
-type errMsg error
 
 type ssl struct {
 	domain     string

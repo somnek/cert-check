@@ -27,6 +27,7 @@ func InitialModel() model {
 		log.Fatal(err)
 	}
 
+	// text input
 	t := textinput.New()
 	t.Placeholder = "Type here..."
 	t.Focus()

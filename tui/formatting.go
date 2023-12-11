@@ -21,8 +21,8 @@ func writeDomainList(b *strings.Builder, s ssl, style lipgloss.Style, cursor str
 }
 
 // TODO: abstract this into a struct
-func writePageControls(b *strings.Builder, page int) {
-	if page == 0 {
+func writePageControls(b *strings.Builder, page page) {
+	if page == home {
 		b.WriteString(styleHelper1.Render("j/k ↑/↓ "))
 		b.WriteString(styleHelper2.Render("select "))
 		b.WriteString(styleHelper2.Render("• "))
@@ -37,7 +37,7 @@ func writePageControls(b *strings.Builder, page int) {
 		b.WriteString(styleHelper2.Render("• "))
 		b.WriteString(styleHelper1.Render("a: "))
 		b.WriteString(styleHelper2.Render("add\n"))
-	} else if page == 1 {
+	} else if page == form {
 		b.WriteString(styleHelper1.Render("ctrl+c: "))
 		b.WriteString(styleHelper2.Render("quit "))
 		b.WriteString(styleHelper2.Render("• "))
