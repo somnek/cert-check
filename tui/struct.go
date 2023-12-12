@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 )
 
@@ -12,12 +13,14 @@ const (
 type page int
 
 type model struct {
+	list   list.Model
 	cursor int
 	input  textinput.Model
 	ssls   []ssl
 	err    error
 	logs   string
 	page   page
+	loaded bool
 }
 
 type userConfig struct {

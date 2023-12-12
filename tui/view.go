@@ -1,8 +1,6 @@
 package tui
 
 import (
-	"strings"
-
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -26,55 +24,9 @@ var (
 )
 
 func (m model) View() string {
-	var b strings.Builder
-	title := "Cert Check"
-
-	b.WriteString(styleTitle.Render(title))
-	b.WriteString("\n\n")
-
-	if m.page == 0 {
-		// page 0: domain view
-
-		// domain list
-		for i, ssl := range m.ssls {
-			var cursor string
-			var style lipgloss.Style // style for each item
-
-			if m.cursor == i {
-				cursor = "│"
-				style = styleSelected
-			} else {
-				cursor = " "
-				style = styleNormal
-			}
-
-			writeDomainList(&b, ssl, style, cursor)
-		}
-
-		// print errors
-		if m.err != nil {
-			b.WriteString(m.err.Error() + "\n\n")
-		}
-
-		// logs
-		b.WriteString(m.logs)
-		b.WriteString("\n")
-
-		writePageControls(&b, m.page)
-
-	} else {
-		// page 1: input view
-		b.WriteString("Enter a domain name: \n\n")
-		b.WriteString(m.input.View() + "\n\n")
-
-		// print errors
-		if m.err != nil {
-			b.WriteString(m.err.Error() + "\n\n")
-		}
-
-		writePageControls(&b, m.page)
+	if !m.loaded {
+		// to do, use spinner when loading
+		return "🔭 dailing saved domains..."
 	}
-
-	containerStyle := lipgloss.NewStyle().Margin(MARGIN).Padding(PADDING)
-	return containerStyle.Render(b.String())
+	return m.list.View()
 }

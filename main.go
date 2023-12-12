@@ -17,7 +17,8 @@ func main() {
 	}
 	defer f.Close()
 
-	p := tea.NewProgram(tui.InitialModel(), tea.WithAltScreen())
+	m := tui.New()
+	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
