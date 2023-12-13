@@ -106,20 +106,14 @@ func GetSavedDomains(path string) ([]string, error) {
 	return domains, err
 }
 
-// LoadSavedDomains reads the config file set the ssl info for each domain
-func LoadSavedDomains(ssls *[]ssl, path string) error {
-	savedDomains, err := GetSavedDomains(path)
-	if err != nil {
-		return err
-	}
-
-	for _, domain := range savedDomains {
-		var info ssl
-
-		info, err = GetInfo(domain)
+// dial domains and return ssl info
+func DialDomains(ssls *[]ssl, domains []string) error {
+	for _, domain := range domains {
+		info, err := GetInfo(domain)
 		if err != nil {
 			return err
 		}
+
 		*ssls = append(*ssls, info)
 	}
 	return nil

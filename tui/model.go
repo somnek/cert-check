@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textinput"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -15,21 +13,8 @@ const (
 	configFile   = "config.yaml"
 )
 
-func New() *model {
-	// text input
-	t := textinput.New()
-	t.Placeholder = "Type here..."
-	t.Focus()
-	t.CharLimit = 200
-	t.Width = 200
-
-	return &model{
-		input: t,
-	}
-
-}
-
-func (m *model) initList(width, height int) {
+func InitProject(redail bool) (tea.Model, tea.Cmd) {
+	m := model{}
 	configPath := GetConfigPath(configFolder, configFile)
 	if !FileExists(configPath) {
 		err := CreateConfig(configFolder, configFile)
@@ -39,30 +24,37 @@ func (m *model) initList(width, height int) {
 	}
 
 	var initSsls []ssl
-	err := LoadSavedDomains(&initSsls, configPath)
+	savedDomains, err := GetSavedDomains(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	if redail {
+		err = DialDomains(&initSsls, savedDomains)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	delegate := list.NewDefaultDelegate()
 	delegate.SetHeight(4)
-	m.list = list.New([]list.Item{}, delegate, width, height)
+
+	m.list = list.New([]list.Item{}, delegate, 8, 8)
 	m.list.Title = "🪜 Cert Check"
-	for i, s := range initSsls {
+
+	for i, s := range m.ssls {
 		m.list.InsertItem(i, s)
 	}
+	return m, nil
 }
 
 func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func (s ssl) FilterValue() string {
-	return s.domain
-}
-func (s ssl) Title() string {
-	return s.domain
-}
+// interface for list.Item
+func (s ssl) FilterValue() string { return s.domain }
+func (s ssl) Title() string       { return s.domain }
 func (s ssl) Description() string {
 	var b strings.Builder
 	b.WriteString("Issued On   : " + s.issuedOn + "\n")

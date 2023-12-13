@@ -17,7 +17,10 @@ func main() {
 	}
 	defer f.Close()
 
-	m := tui.New()
+	// only redail on open
+	redail := true
+
+	m, _ := tui.InitProject(redail)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)

@@ -16,17 +16,18 @@ const (
 )
 
 var (
+	styleApp      = lipgloss.NewStyle().Padding(0, 2) // 1px top/bottom, 2px left/right
 	styleSelected = lipgloss.NewStyle().Foreground(COLOR_PINK)
 	styleNormal   = lipgloss.NewStyle().Foreground(COLOR_GRAY_1)
-	styleTitle    = lipgloss.NewStyle().Foreground(COLOR_GRAY_2).Background(COLOR_DARK_GREEN).Bold(true)
-	styleHelper1  = lipgloss.NewStyle().Foreground(COLOR_GRAY_4)
-	styleHelper2  = lipgloss.NewStyle().Foreground(COLOR_GRAY_3)
+	styleTitle    = lipgloss.NewStyle().
+			Foreground(COLOR_GRAY_2).
+			Background(COLOR_DARK_GREEN).
+			Bold(true)
+	styleHelper1 = lipgloss.NewStyle().Foreground(COLOR_GRAY_4)
+	styleHelper2 = lipgloss.NewStyle().Foreground(COLOR_GRAY_3)
 )
 
 func (m model) View() string {
-	if !m.loaded {
-		// to do, use spinner when loading
-		return "🔭 dailing saved domains..."
-	}
-	return m.list.View()
+	// var b strings.Builder
+	return styleApp.Render(m.list.View())
 }

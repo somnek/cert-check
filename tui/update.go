@@ -1,18 +1,30 @@
 package tui
 
 import (
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type errMsg error
-
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.initList(msg.Width, msg.Height)
-		m.loaded = true
-	}
 	var cmd tea.Cmd
-	m.list, cmd = m.list.Update(msg)
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		// Don't match any of the keys below if we're actively filtering.
+		if m.list.FilterState() == list.Filtering {
+			break
+		}
+
+		switch {
+		case key.Matches(msg, keys.Tab):
+			statusCmd := m.list.NewStatusMessage("You hit enter!")
+			entry := InitEntry()
+			model, cmd := entry.Update(WindowSize)
+			return model, tea.Batch(cmd, statusCmd)
+		}
+		m.list, cmd = m.list.Update(msg)
+	}
+
 	return m, cmd
 }
