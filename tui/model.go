@@ -13,7 +13,7 @@ const (
 	configFile   = "config.yaml"
 )
 
-func InitProject(redail bool) (tea.Model, tea.Cmd) {
+func InitProject(st State) (tea.Model, tea.Cmd) {
 	m := model{}
 	configPath := GetConfigPath(configFolder, configFile)
 	if !FileExists(configPath) {
@@ -24,25 +24,40 @@ func InitProject(redail bool) (tea.Model, tea.Cmd) {
 	}
 
 	var initSsls []ssl
-	savedDomains, err := GetSavedDomains(configPath)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	if redail {
-		err = DialDomains(&initSsls, savedDomains)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	// mock data
+	initSsls = append(initSsls, ssl{
+		domain:     "google.com",
+		issuedOn:   "2021-01-01",
+		expiresOn:  "2022-01-01",
+		issuer:     "Let's Encrypt",
+		commonName: "google.com",
+	})
+	initSsls = append(initSsls, ssl{
+		domain:     "facebook.com",
+		issuedOn:   "2021-01-01",
+		expiresOn:  "2022-01-01",
+		issuer:     "Let's Encrypt",
+		commonName: "facebook.com",
+	})
+
+	// savedDomains, err := GetSavedDomains(configPath)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// err = DialDomains(&initSsls, savedDomains)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	delegate := list.NewDefaultDelegate()
-	delegate.SetHeight(4)
+	delegate.SetHeight(5)
 
-	m.list = list.New([]list.Item{}, delegate, 8, 8)
+	m.list = list.New([]list.Item{}, delegate, st.width, st.height)
 	m.list.Title = "🪜 Cert Check"
 
-	for i, s := range m.ssls {
+	for i, s := range initSsls {
 		m.list.InsertItem(i, s)
 	}
 	return m, nil

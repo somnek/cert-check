@@ -17,6 +17,7 @@ const (
 
 var (
 	styleApp      = lipgloss.NewStyle().Padding(0, 2) // 1px top/bottom, 2px left/right
+	DocStyle      = lipgloss.NewStyle().Margin(0, 2)
 	styleSelected = lipgloss.NewStyle().Foreground(COLOR_PINK)
 	styleNormal   = lipgloss.NewStyle().Foreground(COLOR_GRAY_1)
 	styleTitle    = lipgloss.NewStyle().

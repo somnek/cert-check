@@ -32,3 +32,8 @@ type ssl struct {
 	issuer     string
 	commonName string
 }
+
+type State struct {
+	width  int
+	height int
+}
