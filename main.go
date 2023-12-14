@@ -18,7 +18,7 @@ func main() {
 	}
 	defer f.Close()
 
-	st := tui.State{}
+	st := tui.State{ShouldRedail: true}
 	m, _ := tui.InitProject(st)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {

@@ -33,7 +33,11 @@ type ssl struct {
 	commonName string
 }
 
+// state data shared that are passed back to initProject
 type State struct {
-	width  int
-	height int
+	width        int
+	height       int
+	ssls         []ssl
+	newSsl       ssl
+	ShouldRedail bool
 }

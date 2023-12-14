@@ -13,51 +13,47 @@ const (
 	configFile   = "config.yaml"
 )
 
+// TODO: creat similar function InitList (extract from InitProject)
+// entry should return InitList instead of InitProject
 func InitProject(st State) (tea.Model, tea.Cmd) {
 	m := model{}
-	configPath := GetConfigPath(configFolder, configFile)
-	if !FileExists(configPath) {
-		err := CreateConfig(configFolder, configFile)
+
+	if st.ShouldRedail {
+		// on startup
+		configPath := GetConfigPath(configFolder, configFile)
+		if !FileExists(configPath) {
+			err := CreateConfig(configFolder, configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		m.ssls = []ssl{}
+
+		savedDomains, err := GetSavedDomains(configPath)
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		err = DialDomains(&m.ssls, savedDomains)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else {
+		// coming from entry
+		m.ssls = st.ssls
+		m.list.NewStatusMessage("added " + st.newSsl.domain)
 	}
-
-	var initSsls []ssl
-
-	// mock data
-	initSsls = append(initSsls, ssl{
-		domain:     "google.com",
-		issuedOn:   "2021-01-01",
-		expiresOn:  "2022-01-01",
-		issuer:     "Let's Encrypt",
-		commonName: "google.com",
-	})
-	initSsls = append(initSsls, ssl{
-		domain:     "facebook.com",
-		issuedOn:   "2021-01-01",
-		expiresOn:  "2022-01-01",
-		issuer:     "Let's Encrypt",
-		commonName: "facebook.com",
-	})
-
-	// savedDomains, err := GetSavedDomains(configPath)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// err = DialDomains(&initSsls, savedDomains)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	delegate := list.NewDefaultDelegate()
 	delegate.SetHeight(5)
 
 	m.list = list.New([]list.Item{}, delegate, st.width, st.height)
 	m.list.Title = "🪜 Cert Check"
+	m.list.NewStatusMessage("this is notify")
 
-	for i, s := range initSsls {
+	for i, s := range m.ssls {
 		m.list.InsertItem(i, s)
 	}
 	return m, nil

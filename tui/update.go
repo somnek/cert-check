@@ -27,7 +27,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, keys.Tab):
 			statusCmd := m.list.NewStatusMessage("You hit enter!")
-			entry := InitEntry()
+			entry := InitEntry(m.ssls)
 			model, cmd := entry.Update(WindowSize)
 			return model, tea.Batch(cmd, statusCmd)
 		}
