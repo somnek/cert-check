@@ -2,7 +2,9 @@ package tui
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -14,6 +16,7 @@ type entry struct {
 	ssls   []ssl
 	width  int
 	height int
+	err    error
 }
 
 func (m entry) Init() tea.Cmd {
@@ -63,10 +66,11 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			domain := Sanitize(m.input.Value())
 			info, err := GetInfo(domain)
 			if err != nil {
-				log.Fatal(err)
+				m.err = err
+				m.input.SetValue("")
+				m.input.Focus()
+				return m, nil
 			}
-
-			m.ssls = append(m.ssls, info)
 
 			// Save
 			// check if domain already exists
@@ -102,5 +106,13 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m entry) View() string {
-	return m.input.View()
+	var sb strings.Builder
+
+	sb.WriteString(m.input.View())
+
+	if m.err != nil {
+		sb.WriteString(fmt.Sprintf("\n\n🚫 erorr: %v\n", m.err.Error()))
+	}
+
+	return sb.String()
 }
