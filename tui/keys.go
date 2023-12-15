@@ -5,21 +5,26 @@ import (
 )
 
 type keyMap struct {
-	Tab   key.Binding
-	Up    key.Binding
-	Down  key.Binding
-	Right key.Binding
-	Left  key.Binding
-	Quit  key.Binding
-	Help  key.Binding
-	Add   key.Binding
-	Enter key.Binding
+	Tab    key.Binding
+	Up     key.Binding
+	Down   key.Binding
+	Right  key.Binding
+	Left   key.Binding
+	Quit   key.Binding
+	Help   key.Binding
+	Add    key.Binding
+	Delete key.Binding
+	Enter  key.Binding
 }
 
 var keys = keyMap{
 	Tab: key.NewBinding(
 		key.WithKeys("tab"),
 		key.WithHelp("tab", "switch tab"),
+	),
+	Delete: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "delete"),
 	),
 	Add: key.NewBinding(
 		key.WithKeys("a"),

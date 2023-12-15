@@ -43,10 +43,11 @@ func ExtractField(ssls []ssl, f string) []string {
 }
 
 // Sanitize removes spaces and converts to lowercase
-func Sanitize(s string) string {
-	strings.ReplaceAll(s, " ", "")
-	strings.ToLower(s)
-	ExtractHost(s)
+func Sanitize(raw string) string {
+	s := raw
+	s = strings.ReplaceAll(s, " ", "")
+	s = strings.ToLower(s)
+	s = ExtractHost(s)
 	return s
 }
 
@@ -67,6 +68,5 @@ func Delete[T any](l []T, i int) []T {
 	if len(l) < 1 {
 		return l
 	}
-
 	return append(l[:i], l[i+1:]...)
 }
