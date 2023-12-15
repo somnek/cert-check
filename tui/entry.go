@@ -78,10 +78,11 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			idx := Find(domains, info.domain)
 
 			if idx != -1 {
-				// replace existing domain's info
-				m.ssls[idx] = info
+				// exists: move to top of slice
+				m.ssls = Delete(m.ssls, idx)
+				m.ssls = append([]ssl{info}, m.ssls...)
 			} else {
-				// prepend to slice
+				// new: prepend to slice
 				m.ssls = append([]ssl{info}, m.ssls...)
 
 				// save domain to config file
