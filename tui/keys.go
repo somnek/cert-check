@@ -19,8 +19,8 @@ type keyMap struct {
 
 var keys = keyMap{
 	Tab: key.NewBinding(
-		key.WithKeys("tab"),
-		key.WithHelp("tab", "switch tab"),
+		key.WithKeys("tab", "esc"),
+		key.WithHelp("tab/esc", "switch tab"),
 	),
 	Delete: key.NewBinding(
 		key.WithKeys("x"),
@@ -51,8 +51,8 @@ var keys = keyMap{
 		key.WithHelp("?", "toggle help"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
-		key.WithHelp("q/ctrl+c", "quit"),
+		key.WithKeys("ctrl+c"),
+		key.WithHelp("ctrl+c", "quit"),
 	),
 	Enter: key.NewBinding(
 		key.WithKeys("enter"),
