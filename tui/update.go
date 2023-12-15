@@ -36,6 +36,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// delete
 		case key.Matches(msg, keys.Delete):
+			cmds := []tea.Cmd{}
 			// remove domain from list
 			idx := m.list.Index()
 			m.list.RemoveItem(idx)
@@ -48,6 +49,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.err = err
 				return m, nil
 			}
+			status := m.list.NewStatusMessage("Domain deleted!")
+			cmds = append(cmds, status)
+			return m, tea.Batch(cmds...)
 		}
 
 	}

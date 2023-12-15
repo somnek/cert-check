@@ -109,6 +109,7 @@ func GetSavedDomains(path string) ([]string, error) {
 // dial domains and return ssl info
 func DialDomains(ssls *[]ssl, domains []string) error {
 	for _, domain := range domains {
+		fmt.Printf("...Redailing %s\n", domain)
 		info, err := GetInfo(domain)
 		if err != nil {
 			return err

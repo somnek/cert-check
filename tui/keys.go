@@ -23,8 +23,8 @@ var keys = keyMap{
 		key.WithHelp("tab", "switch tab"),
 	),
 	Delete: key.NewBinding(
-		key.WithKeys("d"),
-		key.WithHelp("d", "delete"),
+		key.WithKeys("x"),
+		key.WithHelp("x", "delete"),
 	),
 	Add: key.NewBinding(
 		key.WithKeys("a"),

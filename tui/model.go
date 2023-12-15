@@ -43,7 +43,6 @@ func InitProject(st State) (tea.Model, tea.Cmd) {
 	} else {
 		// coming from entry
 		m.ssls = st.ssls
-		m.list.NewStatusMessage("added " + st.newSsl.domain)
 	}
 
 	delegate := list.NewDefaultDelegate()
@@ -51,7 +50,6 @@ func InitProject(st State) (tea.Model, tea.Cmd) {
 
 	m.list = list.New([]list.Item{}, delegate, st.width, st.height)
 	m.list.Title = "🪜 Cert Check"
-	m.list.NewStatusMessage("this is notify")
 
 	for i, s := range m.ssls {
 		m.list.InsertItem(i, s)

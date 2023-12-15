@@ -26,7 +26,7 @@ func (m entry) Init() tea.Cmd {
 func InitEntry(ssls []ssl) *entry {
 	// text input
 	t := textinput.New()
-	t.Placeholder = "Type here..."
+	t.Placeholder = "Enter new domain..."
 	t.Focus()
 	t.CharLimit = 200
 	t.Width = 200
