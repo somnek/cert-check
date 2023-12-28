@@ -10,6 +10,7 @@ func hasScheme(rawUrl string) bool {
 	return strings.HasPrefix(rawUrl, "http://") || strings.HasPrefix(rawUrl, "https://")
 }
 
+// ExtractHost returns the host from a given url
 func ExtractHost(rawUrl string) string {
 	if hasScheme(rawUrl) {
 		u, err := url.Parse(rawUrl)

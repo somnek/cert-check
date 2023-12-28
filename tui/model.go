@@ -51,6 +51,7 @@ func InitProject(st State) (tea.Model, tea.Cmd) {
 	// delegate.Styles.SelectedDesc.Foreground(COLOR_PINK_2)
 
 	m.list = list.New([]list.Item{}, delegate, st.width, st.height)
+	m.list.Styles.Title = styleTitle
 	m.list.Title = "🪜 Cert Check"
 
 	for i, s := range m.ssls {

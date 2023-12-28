@@ -31,6 +31,7 @@ func InitEntry(ssls []ssl) *entry {
 	t.CharLimit = 200
 	t.Width = 200
 
+	// remove unnecessary keys for entry page
 	m := entry{
 		input: t,
 	}
@@ -47,6 +48,7 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, keys.Quit):
@@ -56,8 +58,10 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return InitProject(st)
 		case key.Matches(msg, keys.Enter):
 			m.input.Validate = func(s string) error {
-				if s == " " {
+				if s == "" {
 					return errors.New("cannot be empty")
+				} else if !strings.Contains(s, ".") {
+					return errors.New("invalid domain")
 				}
 				return nil
 			}
@@ -109,11 +113,23 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m entry) View() string {
 	var sb strings.Builder
 
+	// title
+	title := "🪜 Cert Check"
+	sb.WriteString(styleTitle.Render(title))
+	sb.WriteString("\n\n")
+
+	// list
 	sb.WriteString(m.input.View())
 
 	if m.err != nil {
 		sb.WriteString(fmt.Sprintf("\n\n🚫 erorr: %v\n", m.err.Error()))
 	}
 
-	return sb.String()
+	// help
+	help := "enter submit • esc back"
+	height := 8 - strings.Count(sb.String(), "\n") - strings.Count(help, "\n")
+	sb.WriteString(strings.Repeat("\n", height))
+	sb.WriteString(styleHelper1.Render(help))
+
+	return stylePadEntry.Render(sb.String())
 }
