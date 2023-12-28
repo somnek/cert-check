@@ -8,6 +8,7 @@ const (
 	MARGIN           = 2
 	PADDING          = 1
 	COLOR_PINK       = lipgloss.Color("#E95678")
+	COLOR_PINK_2     = lipgloss.Color("#bd5970")
 	COLOR_GRAY_1     = lipgloss.Color("#E3E4DB")
 	COLOR_GRAY_2     = lipgloss.Color("#CDCDCD")
 	COLOR_GRAY_3     = lipgloss.Color("#B8BABA")

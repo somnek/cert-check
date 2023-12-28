@@ -47,6 +47,8 @@ func InitProject(st State) (tea.Model, tea.Cmd) {
 
 	delegate := list.NewDefaultDelegate()
 	delegate.SetHeight(5)
+	// delegate.Styles.SelectedTitle.Foreground(COLOR_PINK).Bold(true)
+	// delegate.Styles.SelectedDesc.Foreground(COLOR_PINK_2)
 
 	m.list = list.New([]list.Item{}, delegate, st.width, st.height)
 	m.list.Title = "🪜 Cert Check"
