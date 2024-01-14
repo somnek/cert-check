@@ -31,6 +31,5 @@ var (
 )
 
 func (m model) View() string {
-	// var b strings.Builder
 	return styleApp.Render(m.list.View())
 }

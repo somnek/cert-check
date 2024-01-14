@@ -4,21 +4,11 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 )
 
-const (
-	home page = iota
-	form
-)
-
-type page int
-type errMsg error
-
 type model struct {
-	list   list.Model
-	cursor int
-	ssls   []ssl
-	err    error
-	logs   string
-	page   page
+	list list.Model
+	ssls []ssl
+	err  error
+	logs string
 }
 
 type userConfig struct {
