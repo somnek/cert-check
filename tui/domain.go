@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -108,16 +109,69 @@ func GetSavedDomains(path string) ([]string, error) {
 
 // dial domains and return ssl info
 func DialDomains(ssls *[]ssl, domains []string) error {
-	for _, domain := range domains {
-		fmt.Printf("...Dailing %s\n", domain)
-		info, err := GetInfo(domain)
-		if err != nil {
-			return err
-		}
+	var wg sync.WaitGroup
+	ch := make(chan chDailRes, len(domains))
 
-		*ssls = append(*ssls, info)
+	for _, domain := range domains {
+
+		wg.Add(1)
+		go func(d string) {
+			defer wg.Done()
+			fmt.Printf("...Dailing %s\n", d)
+			GetInfo(d, ch)
+		}(domain)
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for res := range ch {
+		if res.err != nil {
+			return res.err
+		}
+		*ssls = append(*ssls, res.ssl)
 	}
 	return nil
+}
+
+// GetInfo returns the ssl info for a given domain
+func GetInfo(domain string, ch chan chDailRes) {
+	// create a custom Dialer with a timeout value
+	Dialer := &net.Dialer{
+		Timeout: dialTimeout,
+	}
+
+	conn, err := tls.DialWithDialer(Dialer, "tcp", domain+":443", nil)
+	if err != nil {
+		// check whether it is a timeout error
+		if e, ok := err.(net.Error); ok && e.Timeout() {
+			ch <- chDailRes{ssl{}, fmt.Errorf("timeout error: %v", err)}
+			// return ssl{}, fmt.Errorf("timeout error: %v", err)
+		}
+		ch <- chDailRes{ssl{}, fmt.Errorf("error dialing: %v", err)}
+		// return ssl{}, fmt.Errorf("error dialing: %v", err)
+	}
+	defer conn.Close()
+
+	state := conn.ConnectionState()
+	leafCert := state.PeerCertificates[0]
+	issuedOn := leafCert.NotBefore.String()
+	expiresOn := leafCert.NotAfter.String()
+	issuer := leafCert.Issuer.CommonName
+	commonName := leafCert.Subject.CommonName
+
+	ch <- chDailRes{
+		ssl{
+			domain:     domain,
+			issuedOn:   issuedOn,
+			expiresOn:  expiresOn,
+			issuer:     issuer,
+			commonName: commonName,
+		},
+		nil,
+	}
 }
 
 // CreateConfig creates a config file with dummy content
@@ -144,38 +198,4 @@ func CreateConfig(configFolder, configFile string) error {
 	}
 
 	return nil
-}
-
-// GetInfo returns the ssl info for a given domain
-func GetInfo(domain string) (ssl, error) {
-	// create a custom Dialer with a timeout value
-	Dialer := &net.Dialer{
-		Timeout: dialTimeout,
-	}
-
-	conn, err := tls.DialWithDialer(Dialer, "tcp", domain+":443", nil)
-	if err != nil {
-		// check whether it is a timeout error
-		if e, ok := err.(net.Error); ok && e.Timeout() {
-			return ssl{}, fmt.Errorf("timeout error: %v", err)
-		}
-		return ssl{}, fmt.Errorf("error dialing: %v", err)
-	}
-	defer conn.Close()
-
-	state := conn.ConnectionState()
-	leafCert := state.PeerCertificates[0]
-	issuedOn := leafCert.NotBefore.String()
-	expiresOn := leafCert.NotAfter.String()
-	issuer := leafCert.Issuer.CommonName
-	commonName := leafCert.Subject.CommonName
-
-	return ssl{
-		domain:     domain,
-		issuedOn:   issuedOn,
-		expiresOn:  expiresOn,
-		issuer:     issuer,
-		commonName: commonName,
-	}, nil
-
 }

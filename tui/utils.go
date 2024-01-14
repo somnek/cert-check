@@ -3,6 +3,7 @@ package tui
 import (
 	"log"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -70,4 +71,17 @@ func Delete[T any](l []T, i int) []T {
 		return l
 	}
 	return append(l[:i], l[i+1:]...)
+}
+
+// logToFile prints output to debug.log
+func logToFile(s ...any) {
+	f, err := os.OpenFile("debug.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(nil)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+	for _, t := range s {
+		log.Print(t)
+	}
 }

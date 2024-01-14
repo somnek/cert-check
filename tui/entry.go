@@ -68,13 +68,17 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// dail
 			domain := Sanitize(m.input.Value())
-			info, err := GetInfo(domain)
-			if err != nil {
-				m.err = err
+			ch := make(chan chDailRes)
+			go GetInfo(domain, ch)
+			res := <-ch
+			if res.err != nil {
+				m.err = res.err
 				m.input.SetValue("")
 				m.input.Focus()
 				return m, nil
 			}
+
+			info := res.ssl
 
 			// Save
 			// check if domain already exists

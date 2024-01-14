@@ -31,3 +31,9 @@ type State struct {
 	newSsl       ssl
 	ShouldRedail bool
 }
+
+// channel response from dialing domain
+type chDailRes struct {
+	ssl ssl
+	err error
+}
