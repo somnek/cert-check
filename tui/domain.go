@@ -148,10 +148,8 @@ func GetInfo(domain string, ch chan chDailRes) {
 		// check whether it is a timeout error
 		if e, ok := err.(net.Error); ok && e.Timeout() {
 			ch <- chDailRes{ssl{}, fmt.Errorf("timeout error: %v", err)}
-			// return ssl{}, fmt.Errorf("timeout error: %v", err)
 		}
 		ch <- chDailRes{ssl{}, fmt.Errorf("error dialing: %v", err)}
-		// return ssl{}, fmt.Errorf("error dialing: %v", err)
 	}
 	defer conn.Close()
 
@@ -161,6 +159,7 @@ func GetInfo(domain string, ch chan chDailRes) {
 	expiresOn := leafCert.NotAfter.String()
 	issuer := leafCert.Issuer.CommonName
 	commonName := leafCert.Subject.CommonName
+	daysLeft := CalculateDaysLeft(leafCert.NotAfter)
 
 	ch <- chDailRes{
 		ssl{
@@ -169,6 +168,7 @@ func GetInfo(domain string, ch chan chDailRes) {
 			expiresOn:  expiresOn,
 			issuer:     issuer,
 			commonName: commonName,
+			daysLeft:   daysLeft,
 		},
 		nil,
 	}

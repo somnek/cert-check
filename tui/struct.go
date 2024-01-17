@@ -21,6 +21,7 @@ type ssl struct {
 	expiresOn  string
 	issuer     string
 	commonName string
+	daysLeft   int
 }
 
 // state data shared that are passed back to initProject

@@ -5,8 +5,16 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 )
 
+// CalculateDaysLeft returns the number of days left until expiry
+func CalculateDaysLeft(expiry time.Time) int {
+	return int(time.Until(expiry).Hours() / 24)
+	// return int(expiry.Sub(time.Now()).Hours() / 24)
+}
+
+// hasScheme returns true if the url has a scheme
 func hasScheme(rawUrl string) bool {
 	return strings.HasPrefix(rawUrl, "http://") || strings.HasPrefix(rawUrl, "https://")
 }

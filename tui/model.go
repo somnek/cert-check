@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -13,8 +14,6 @@ const (
 	configFile   = "config.yaml"
 )
 
-// TODO: creat similar function InitList (extract from InitProject)
-// entry should return InitList instead of InitProject
 func InitProject(st State) (tea.Model, tea.Cmd) {
 	m := model{}
 
@@ -30,6 +29,7 @@ func InitProject(st State) (tea.Model, tea.Cmd) {
 
 		m.ssls = []ssl{}
 
+		// TODO: merge GetSavedDomains and DialDomains in single function
 		savedDomains, err := GetSavedDomains(configPath)
 		if err != nil {
 			log.Fatal(err)
@@ -45,18 +45,19 @@ func InitProject(st State) (tea.Model, tea.Cmd) {
 		m.ssls = st.ssls
 	}
 
+	// populate list
 	delegate := list.NewDefaultDelegate()
-	delegate.SetHeight(5)
-	// delegate.Styles.SelectedTitle.Foreground(COLOR_PINK).Bold(true)
-	// delegate.Styles.SelectedDesc.Foreground(COLOR_PINK_2)
-
+	delegate.SetHeight(6) // height per item
 	m.list = list.New([]list.Item{}, delegate, st.width, st.height)
-	m.list.Styles.Title = styleTitle
-	m.list.Title = "🪜 Cert Check"
 
 	for i, s := range m.ssls {
 		m.list.InsertItem(i, s)
 	}
+
+	// title
+	m.list.Styles.Title = styleTitle
+	m.list.Title = lipgloss.NewStyle().MarginLeft(18).Render("🪜 Cert Check")
+
 	return m, nil
 }
 
@@ -67,8 +68,10 @@ func (m model) Init() tea.Cmd {
 // interface for list.Item
 func (s ssl) FilterValue() string { return s.domain }
 func (s ssl) Title() string       { return s.domain }
+
 func (s ssl) Description() string {
 	var b strings.Builder
+	b.WriteString(RenderDaysLeft(s.daysLeft))
 	b.WriteString("Issued On   : " + s.issuedOn + "\n")
 	b.WriteString("Expires On  : " + s.expiresOn + "\n")
 	b.WriteString("Issuer      : " + s.issuer + "\n")
