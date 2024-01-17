@@ -6,6 +6,7 @@ import (
 
 type keyMap struct {
 	Tab    key.Binding
+	Esc    key.Binding
 	Up     key.Binding
 	Down   key.Binding
 	Right  key.Binding
@@ -19,8 +20,12 @@ type keyMap struct {
 
 var keys = keyMap{
 	Tab: key.NewBinding(
-		key.WithKeys("tab", "esc"),
-		key.WithHelp("tab/esc", "switch tab"),
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "switch tab"),
+	),
+	Esc: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "switch tab"),
 	),
 	Delete: key.NewBinding(
 		key.WithKeys("x"),

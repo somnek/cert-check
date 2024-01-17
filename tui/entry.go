@@ -53,7 +53,7 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, keys.Quit):
 			return m, tea.Quit
-		case key.Matches(msg, keys.Tab):
+		case key.Matches(msg, keys.Tab, keys.Esc):
 			st := State{width: m.width, height: m.height, ssls: m.ssls, ShouldRedail: false}
 			return InitProject(st)
 		case key.Matches(msg, keys.Enter):

@@ -24,7 +24,6 @@ var (
 	styleNormal   = lipgloss.NewStyle().Foreground(COLOR_GRAY_1)
 	styleTitle    = lipgloss.NewStyle().
 			Foreground(COLOR_GRAY_2).
-			Background(COLOR_DARK_GREEN).
 			Bold(true)
 	styleHelper1 = lipgloss.NewStyle().Foreground(COLOR_GRAY_4)
 	styleHelper2 = lipgloss.NewStyle().Foreground(COLOR_GRAY_3)
