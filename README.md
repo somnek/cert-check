@@ -18,7 +18,7 @@ You can install the appropriate binary from the [release page](https://github.co
 
 #### Note:
 
-If you're on macOS, you may need to run `xattr -c ./Cert\ Check.gz` to (to avoid "unknown developer" warning)
+If you're on macOS, you may need to run `xattr -c ./Cert\ Check\ Darwin.gz` to (to avoid "unknown developer" warning)
 
 ## Controls
 
