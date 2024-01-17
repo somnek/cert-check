@@ -43,7 +43,5 @@ func RenderDaysLeft(daysLeft int) string {
 }
 
 func (m model) View() string {
-	w := lipgloss.Width(m.list.View())
-	logToFile(w)
 	return styleApp.Render(m.list.View())
 }
