@@ -6,7 +6,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -56,7 +55,7 @@ func InitProject(st State) (tea.Model, tea.Cmd) {
 
 	// title
 	m.list.Styles.Title = styleTitle
-	m.list.Title = lipgloss.NewStyle().MarginLeft(18).Render("🪜 Cert Check")
+	m.list.Title = "🪜 Cert Check"
 
 	return m, nil
 }

@@ -28,6 +28,7 @@ var (
 	styleSelected     = lipgloss.NewStyle().Foreground(COLOR_PINK)
 	styleNormal       = lipgloss.NewStyle().Foreground(COLOR_GRAY_1)
 	styleTitle        = lipgloss.NewStyle().
+				MarginLeft(18).
 				Foreground(COLOR_GRAY_2).
 				Bold(true)
 	styleHelper1 = lipgloss.NewStyle().Foreground(COLOR_GRAY_4)

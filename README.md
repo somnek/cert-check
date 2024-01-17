@@ -1,7 +1,16 @@
 ## cert-check
 
-- TUI that allows checking domain's certificate expiry date.
-- `cert-check` will save your domain name, so you can easily check it again later.
+`cert-check` is a simple terminal UI tool to check domain's certificate expiry date.
+
+<p align="center">
+  <img src="./assets/demo.gif" width="500px">
+</p>
+
+## Features
+
+- add multiple domains
+- remember added domains
+- filter domain list
 
 ## Installation
 
@@ -19,3 +28,8 @@ If you're on macOS, you may need to run `xattr -c ./cert-check_Darwin_x86_64.tar
 | `x`      | Delete |
 | `?`      | Help   |
 | `q`      | Quit   |
+| `/`      | Filter |
+| `↓/j`    | Down   |
+| `↑/k`    | Up     |
+| `→/l`    | Next   |
+| `←/h`    | Prev   |
