@@ -150,6 +150,7 @@ func GetInfo(domain string, ch chan chDailRes) {
 			ch <- chDailRes{ssl{}, fmt.Errorf("timeout error: %v", err)}
 		}
 		ch <- chDailRes{ssl{}, fmt.Errorf("error dialing: %v", err)}
+		return // return to avoid closing the channel, which would cause a panic
 	}
 	defer conn.Close()
 

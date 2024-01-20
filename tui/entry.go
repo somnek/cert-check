@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -41,7 +40,6 @@ func InitEntry(ssls []ssl) *entry {
 
 func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-
 	m.input, cmd = m.input.Update(msg)
 
 	switch msg := msg.(type) {
@@ -57,15 +55,6 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			st := State{width: m.width, height: m.height, ssls: m.ssls, ShouldRedail: false}
 			return InitProject(st)
 		case key.Matches(msg, keys.Enter):
-			m.input.Validate = func(s string) error {
-				if s == "" {
-					return errors.New("cannot be empty")
-				} else if !strings.Contains(s, ".") {
-					return errors.New("invalid domain")
-				}
-				return nil
-			}
-
 			// dail
 			domain := Sanitize(m.input.Value())
 			ch := make(chan chDailRes)
