@@ -57,7 +57,7 @@ func (m entry) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Enter):
 			// dail
 			domain := Sanitize(m.input.Value())
-			ch := make(chan chDailRes)
+			ch := make(chan chDailRes, 1)
 			go GetInfo(domain, ch)
 			res := <-ch
 			if res.err != nil {

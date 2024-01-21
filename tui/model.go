@@ -34,9 +34,9 @@ func InitProject(st State) (tea.Model, tea.Cmd) {
 			log.Fatal(err)
 		}
 
-		err = DialDomains(&m.ssls, savedDomains)
+		DialDomains(&m.ssls, savedDomains)
 		if err != nil {
-			log.Fatal(err)
+			m.err = err
 		}
 
 	} else {

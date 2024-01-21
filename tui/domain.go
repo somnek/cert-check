@@ -108,7 +108,7 @@ func GetSavedDomains(path string) ([]string, error) {
 }
 
 // dial domains and return ssl info
-func DialDomains(ssls *[]ssl, domains []string) error {
+func DialDomains(ssls *[]ssl, domains []string) {
 	var wg sync.WaitGroup
 	ch := make(chan chDailRes, len(domains))
 
@@ -129,11 +129,13 @@ func DialDomains(ssls *[]ssl, domains []string) error {
 
 	for res := range ch {
 		if res.err != nil {
-			return res.err
+			// remove problematic domain from config file
+			DeleteFromConfig(res.ssl.domain, GetConfigPath(configFolder, configFile))
+			fmt.Fprint(os.Stderr, res.err.Error())
+			continue
 		}
 		*ssls = append(*ssls, res.ssl)
 	}
-	return nil
 }
 
 // GetInfo returns the ssl info for a given domain
@@ -147,9 +149,9 @@ func GetInfo(domain string, ch chan chDailRes) {
 	if err != nil {
 		// check whether it is a timeout error
 		if e, ok := err.(net.Error); ok && e.Timeout() {
-			ch <- chDailRes{ssl{}, fmt.Errorf("timeout error: %v", err)}
+			ch <- chDailRes{ssl{domain: domain}, fmt.Errorf("timeout error: %v", err)}
 		}
-		ch <- chDailRes{ssl{}, fmt.Errorf("error dialing: %v", err)}
+		ch <- chDailRes{ssl{domain: domain}, fmt.Errorf("error dialing: %v", err)}
 		return // return to avoid closing the channel, which would cause a panic
 	}
 	defer conn.Close()
