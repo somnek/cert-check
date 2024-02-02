@@ -14,7 +14,7 @@
 
 ## Installation
 
-You can install the appropriate binary from the [release page](https://github.com/somnek/cert-check/releases).
+You can download the appropriate binary from the [release page](https://github.com/somnek/cert-check/releases).
 
 #### Note:
 
